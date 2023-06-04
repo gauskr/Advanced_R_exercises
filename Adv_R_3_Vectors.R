@@ -596,3 +596,99 @@ as_tibble(df3, rownames = "name")
 
 dplyr::starwars
 
+df1 <- data.frame(xyz = "a")
+df2 <- tibble(xyz = "a")
+
+str(df1$x)
+str(df2$x)
+
+
+# 3.6.5 Testing and coercing ----------------------------------------------
+
+is.data.frame(df1)
+is.data.frame(df2)
+
+is_tibble(df1)
+is_tibble(df2)
+
+
+# 3.6.6 List columns ------------------------------------------------------
+
+df <- data.frame(x = 1:3)
+df$y <- list(1:2, 1:3, 1:4)
+
+data.frame(x = 1:3,
+           y = I(list(1:2, 1:3, 1:4)))
+
+tibble(x = 1:3,
+       y = list(1:2, 1:3, 1:4))
+
+
+# 3.6.7 Matrix and data frame columns -------------------------------------
+
+dfm <- data.frame(x = 1:3*10)
+dfm$y <- matrix(1:9, nrow = 3)
+dfm$z <- data.frame(a = 3:1, b = letters[1:3], stringsAsFactors = FALSE)
+
+str(dfm)
+
+dfm[1,]
+
+
+# 3.6.8 Exercises ---------------------------------------------------------
+
+# 1.Can you have a data frame with zero rows? What about zero columns?
+names(dfm)
+dfm[,-c("x", "y", "z")]
+
+data.frame(NULL)
+tibble(NULL)
+
+# Answer: Yes.
+
+# 2. What happens if you attempt to set rownames that are not unique?
+df <- data.frame(x = 1:3,
+           x = 4:6)
+names(df)
+
+df2 <- tibble(x = 1:3,
+                 x = 4:6)
+
+# data.frame() assigns a number which makes the name unique. tibble() throws
+# an error.
+
+# 3. If df is a data frame, what can you say about t(df), and t(t(df))?
+# Perform some experiments, making sure to try different column types.
+
+t(t(df)) == df
+
+df$y <- letters[3:1]
+df$z <- c(T,F,T)
+df
+t(df)
+t(t(df))
+
+df$y <- c(T,F,T)
+df
+t(df)
+t(t(df))
+
+# with t(df) the resulting columns are interpreted as variables. Thus rules
+# for implicit coercion applies. This means, if the variables in df are of
+# different types, then the entire data fram t(df) will be of the same type
+# as the most complex variable in df. Therefore, t(t(df)) != df.
+
+# What does as.matrix() do when applied to a data frame with columns of
+# different types?
+
+df <- data.frame(x = 1:3,
+                 y = letters[4:6],
+                 x = c(F,T,T),
+                 stringsAsFactors = F
+)
+# How does it differ from data.matrix()?
+as.matrix(df) # converts to most complex.
+data.matrix(df) # treats non-factor character string as factor. Converts
+# to numeric.
+?data.matrix
+

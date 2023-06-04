@@ -289,9 +289,310 @@ comment(x) <- c("This is my very important data from experiment #0234",
 x
 comment(x)
 
-has_comment <- function(x) mean(!is.na(comment(x))) != 0
+has_comment <- function(x) {test <- mean(!is.na(comment(x))) != 0
+if (test == TRUE) {
+  TRUE
+} else FALSE
+}
+
+has_comment2 <- function(x) !is.null(comment(x))
+
+is.null(NULL)
 has_comment(x)
+has_comment(orange$Tree)
+has_comment(orange$age)
+has_comment2(orange$age)
+
+
+#because
+is.na(NULL)
+logical(0)
+logical(4)
+?logical
 
 # 3.4 S3 atomic vectors ---------------------------------------------------
 
+# 3.4.1 Factors -----------------------------------------------------------
+
+?factor
+x <-  factor(c("a", "b", "b", "a"))
+x
+
+typeof(x)
+attributes(x)
+
+sex_char <- c("m", "m", "m")
+sex_factor <- factor(sex_char, levels = c("m", "f"))
+
+table(sex_char)
+table(sex_factor)
+
+grade <- ordered(c("b", "b", "a", "c"), levels = c("c", "b", "a"))
+grade
+table(grade)
+
+
+# 3.4.2 Dates -------------------------------------------------------------
+
+today <- Sys.Date()
+typeof(today)
+attributes(today)
+
+date <- as.Date("1970-02-01")
+unclass(date)
+
+
+# 3.4.3 Date-times --------------------------------------------------------
+
+now_ct <- as.POSIXct("2018-08-01 22:00", tz = "UTC")
+now_ct
+typeof(now_ct)
+class(now_ct)
+
+structure(now_ct, tzone = "Asia/Tokyo")
+structure(now_ct, tzone = "America/New_York")
+structure(now_ct, tzone = "Australia/Lord_Howe")
+structure(now_ct, tzone = "Europe/Paris")
+structure(now_ct, tzone = "Europe/Oslo")
+
+
+# 3.4.4 Durations ---------------------------------------------------------
+
+one_week_1 <- as.difftime(1, units = "weeks")
+one_week_1
+
+typeof(one_week_1)
+attributes(one_week_1)
+
+one_week_2 <- as.difftime(7, units = "days")
+one_week_2
+
+typeof(one_week_2)
+attributes(one_week_2)
+
+
+# 3.4.5 Exercises ---------------------------------------------------------
+
+# 1. What sort of object does table() return?
+# What is its type?
+# What attributes does it have?
+# How does the dimensionality change as you tabulate more variables?
+
+object_table <- table(cars$speed)
+ typeof(object_table)
+ attributes(object_table)
+
+object_table_2 <- table(cars$speed, cars$dist)
+typeof(object_table_2)
+attributes(object_table_2)
+
+# 2. What happens to a factor when you modify its levels?
+
+f1 <- factor(letters)
+class(f1)
+attributes(f1)
+typeof(f1)
+
+levels(f1) <- rev(levels(f1))
+
+class(f1)
+attributes(f1)
+typeof(f1)
+
+?levels
+?gl
+y <- gl(2, 4, 8)
+y
+y*2
+levels(y) <- c("low", "high")
+y
+as.numeric(y)
+
+# Ans. the level-attribute changes.
+
+# 3. What does this code do?
+# How do f2 and f3 differ from f1?
+
+f2 <- rev(factor(letters)) # factors are same as f1, but vector is reverse
+
+f3 <- factor(letters, levels = rev(letters)) # same vector, but reverse levels
+
+##
+f1 <- factor(letters)
+
+f1
+f3
+f2
+
+
+# 3.5 Lists ---------------------------------------------------------------
+
+
+# 3.5.1 Creating ----------------------------------------------------------
+
+
+l1 <- list(1:3,
+           "a",
+           c(TRUE, FALSE, TRUE),
+           c(2.3, 5.9))
+
+typeof(l1)
+str(l1)
+
+lobstr::obj_size(mtcars)
+l2 <- list(mtcars, mtcars, mtcars, mtcars)
+lobstr::obj_size(l2)
+
+l3 <- list(list(list(1)))
+str(l3)
+
+l4 <- list(list(1, 2), c(3, 4))
+l5 <- c(list(1,2), c(2,4))
+
+str(l4)
+str(l5)
+
+# 3.5.2 Testing and coercion ----------------------------------------------
+
+list(1:3)
+as.list(1:3)
+
+# 3.5.3 Matrices and arrays -----------------------------------------------
+
+l <- list(1:3, "a", TRUE, 1.0)
+dim(l) <- c(2,2)
+l[[1,1]]
+
+# 3.5.4 Exercises ---------------------------------------------------------
+
+# 1. List all the ways that a list differs from an atomic vector.
+# A list can have any kind of objekt. An atomic vector has only one type of content.
+# Or... lists consist of references (same objects) to objects of any kind, while
+# atomic vectors consist of references to one type of objects (raw, complex, logical,
+# integer, double, character).
+ l <- list(",", TRUE, 3.4)
+attributes(l)
+
+# 2. Why do you need to use unlist() to convert a list to an atomic vector?
+# Why doesn’t as.vector() work?
+?unlist
+?as.vector
+unlist(l)
+as.vector(l)
+
+df <- data.frame(x = 1:3, y = 5:7)
+## Error:
+try(as.vector(data.frame(x = 1:3, y = 5:7), mode = "numeric"))
+
+x <- c(a = 1, b = 2)
+is.vector(x)
+as.vector(x)
+all.equal(x, as.vector(x)) ## FALSE
+
+
+###-- All the following are TRUE:
+is.list(df)
+! is.vector(df)
+! is.vector(df, mode = "list")
+
+is.vector(list(), mode = "list")
+unlist
+as.vector
+?.Internal
+
+## Ans. A vector in R is either an atomic vector i.e., one of the atomic types,
+## see ‘Details’, or of type (typeof) or mode list or expression.
+## Therefore, nothing happens when using as-vector() on a list. It already is a list!
+
+# 3. Compare and contrast c() and unlist() when combining a date and date-time into
+# a single vector.
+
+ddate <- as.Date("2023-02-06")
+ddatetime <- as.POSIXct("2023-02-06 22:00", tz = "UTC")
+
+c(ddate, ddatetime) |> attributes() # both are Date-class
+unlist(ddate, ddatetime) # only one. Hm. Why?
+
+unlist(list(ddatetime, ddate)) # get it...
+unlist(list(ddatetime, ddate)) |> attributes() # NULL
+
+ellen.bugen@regnskap-kontor.no
+
+?as.POSIXct
+as.POSIXct
+?as.Date()
+as.Date
+
+
+# 3.6 Data frames and tibbles ---------------------------------------------
+
+df1 <- data.frame(x = 1:3, y = letters[1:3])
+typeof(df1)
+attributes(df1)
+
+library(tibble)
+
+df2 <- tibble(x = 1:3, y = letters[1:3])
+typeof(df2)
+attributes(df2)
+
+# 3.6.1 Creating ----------------------------------------------------------
+
+df <- data.frame(
+  x = 1:3,
+  y = c("a", "b", "c")
+)
+str(df)
+
+df1 <- data.frame(
+  x = 1:3,
+  y = c("a", "b", "c"),
+  stringsAsFactors = FALSE
+)
+str(df1)
+
+df2 <- tibble(
+  x = 1:3,
+  y = c("a", "b", "c")
+)
+str(df2)
+
+names(data.frame(`1` = 1))
+names(tibble(`1` = 1))
+
+
+data.frame(x = 1:4, y = 1:2)
+data.frame(x = 1:4, y = 1:3) # ERROR
+tibble(x = 1:4, y = 1)
+tibble(x = 1:4, y = 1:2) # ERROR
+
+tibble(
+  x = 1:3,
+  y = x*2
+)
+
+data.frame(
+  x = 1:3,
+  y = x*2
+)
+
+
+# 3.6.2 Row names ---------------------------------------------------------
+
+df3 <- data.frame(
+  age = c(35, 27, 18),
+  hair = c("blonde", "brown", "black"),
+  row.names = c("Bob", "Susan", "Sam")
+)
+df3
+
+rownames(df3)
+
+df3["Bob", ]
+df3[c(1, 1, 1), ]
+as_tibble(df3, rownames = "name")
+
+# 3.6.3 Printing
+
+dplyr::starwars
 

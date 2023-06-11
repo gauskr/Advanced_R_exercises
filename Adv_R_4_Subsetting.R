@@ -415,3 +415,93 @@ unwhich(x, 10)
 # X & Y <-> intersect(x, y)
 x1 & y1
 intersect(x2, y2)
+
+# X | Y <-> union(x, y)
+x1 | y1
+union(x2, y2)
+
+# X & !Y <-> setdiff(x, y)
+x1 & !y1
+setdiff(x2, y2)
+
+# xor(X, Y) <-> setdiff(union(x, y), intersect(x, y))
+xor(x1, y1)
+setdiff(union(x2, y2), intersect(x2, y2))
+
+# 4.5.9 Exercises
+
+# 1. How would you randomly permute the columns of a data frame?
+# (This is an important technique in random forests.)
+# Can you simultaneously permute the rows and columns in one step?
+
+# Answer:
+df <- data.frame(x = 1:8, y = 8:1, z = letters[1:8], æ = letters[8:1])
+df
+# random rows and cols:
+df[sample(nrow(df)), sample(ncol(df))]
+# just columns:
+df[, sample(ncol(df))]
+
+# 2. How would you select a random sample of m rows from a data frame?
+# What if the sample had to be contiguous (i.e., with an initial row, a final row, and
+# every row in between)?
+
+contiguous_row_sampling <- function(df) {
+rbind(df[1,],
+      df[-c(1, nrow(df)), ][sample(nrow(df)-2), ],
+      df[nrow(df),])
+}
+
+contiguous_row_sampling(df)
+contiguous_row_sampling(mtcars[1:5,])
+
+# 3. How could you put the columns in a data frame in alphabetical order?
+
+order_alphabetical_cols <- function(df) {
+  df[, order(names(df))]
+}
+
+order_alphabetical_cols(mtcars[1:5,])
+
+# DOING THE QUIZ ----------------------------------------------------------
+
+# 1. What is the result of subsetting a vector with positive integers,
+# negative integers,
+# a logical vector,
+# or a character vector?
+
+# Answer. the result can be the same. If one knows the number of cols one wish to use,
+# positive integers will do - they select the elements indicated by numbers.
+# Negative integers will remove elements indicated by number.
+# A logical vector will keep elements corresponding to TRUE, and remove elements
+# corresponding to FALSE. While a character vector select elements by name, if they are
+# named. This can also be done negatively, by using - before c()- vector.
+
+vec %in% "c" # This is a logical vector!!
+
+# 2. What’s the difference between [, [[, and $ when applied to a list?
+# Answer: [ returns element as list.
+# [[ returns element.
+# The same does $
+
+# 3. When should you use drop = FALSE?
+# Ans. When you need to retain dimensionality!
+
+
+# 4. If x is a matrix, what does x[] <- 0 do? How is it different from x <- 0?
+# Answer: it sets every "cell" to zero
+
+df <- as.matrix(df)
+df[] <- 0
+df
+
+m <- matrix(1:9, nrow = 3)
+m[] <- 0
+m
+
+# 5. How can you use a named vector to relabel categorical variables?
+# Answer: like this
+
+marry_fuck_kill <- stringr::str_split("m,m,m,m,f,f,k,k,k,f,m,f,f,k,k", ",")[[1]]
+map_vec <- c(m = "Marry" , f = "Fuck", k = "Kill")
+map_vec[marry_fuck_kill]

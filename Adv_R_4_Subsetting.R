@@ -374,3 +374,44 @@ df2 <- df[sample(nrow(df)), 3:1]
 df2[order(df2$x), ]
 df2[ , order(names(df2))]
 
+# 4.5.5 Expanding aggregated counts (integer subsetting) ------------------
+
+df <- data.frame(x = c(2, 4, 1), y = c(9, 11, 6), n = c(3, 5, 1))
+rep(1:nrow(df), df$n)
+df[rep(1:nrow(df), df$n), ]
+
+# 4.5.6 Removing columns from data frames (character ) --------------------
+
+df <- data.frame(x = 1:3, y = 3:1, z = letters[1:3])
+df
+df$z <- NULL
+df <- data.frame(x = 1:3, y = 3:1, z = letters[1:3])
+df[c("x", "y")]
+df[setdiff(names(df), "z")]
+
+# 4.5.7 Selecting rows based on a condition (logical subsetting) ----------
+rm(mtcars) # if mtcars is list...
+mtcars[mtcars$gear == 5, ]
+mtcars[mtcars$gear == 5 & mtcars$cyl == 4, ]
+
+# 4.5.8 Boolean algebra versus sets (logical and integer ) ----------------
+
+x <- sample(10) < 4
+which(x)
+
+unwhich <- function(x, n) {
+  out <- rep_len(FALSE, n)
+  out[x] <- TRUE
+  out
+}
+
+unwhich(x, 10)
+
+(x1 <- 1:10 %% 2 == 0)
+(x2 <- which(x1))
+(y1 <- 1:10 %% 5 == 0)
+(y2 <- which(y1))
+
+# X & Y <-> intersect(x, y)
+x1 & y1
+intersect(x2, y2)

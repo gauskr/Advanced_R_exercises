@@ -233,4 +233,144 @@ df
 
 # 4.3 Selecting a single element ------------------------------------------
 
+# 4.3.1 [[ ----------------------------------------------------------------
+
+x <- list(1:3, "a", 4:6)
+for (i in 2:length(x)) {
+  out[i] <- fun(x[i], out[i - 1])
+}
+
+for (i in 2:length(x)) {
+  out[[i]] <- fun(x[[i]], out[[i - 1]])
+}
+
+# 4.3.2 $ -----------------------------------------------------------------
+
+var <- "cyl"
+# Doesn't work - mtcars$var translated to mtcars[["var"]]
+mtcars$var
+
+# Instead use [[
+mtcars[[var]]
+
+x <- list(abc = 1)
+x$a
+x[["a"]]
+
+options(warnPartialMatchDollar = TRUE)
+x$a
+
+# 4.3.3 Missing and out-of-bounds indices ---------------------------------
+
+x <- list(a = c(1, 2, 3),
+          b = c(3, 4, 5))
+
+purrr::pluck(x, "a", 1)
+purrr::pluck(x, "c", 1)
+purrr::pluck(x, "c", 1, .default = NA)
+
+# 4.3.4 @ and slot() ------------------------------------------------------
+
+# Operators for S4 which is, appr., the same kinds of functions as $ and [[
+
+# 4.3.5 Exercises ---------------------------------------------------------
+
+# 1. Brainstorm as many ways as possible to extract the third value from
+# the cyl variable in the mtcars dataset.
+
+mtcars[[3, "cyl"]]
+rownames(mtcars)[3]
+mtcars[["Datsun 710", "cyl"]]
+mtcars[[3,2]]
+mtcars[["Datsun 710",2]]
+cyl <- mtcars$cyl
+cyl[3]
+
+m <- matrix(rep(FALSE, dim(mtcars)[1]*dim(mtcars)[2]), nrow = dim(mtcars)[1])
+m[3,2] <- TRUE
+mtcars[m]
+
+
+# 2. Given a linear model, e.g., mod <- lm(mpg ~ wt, data = mtcars),
+# extract the residual degrees of freedom. Then extract the R squared from
+# the model summary (summary(mod))
+
+solve_assignment_2 <- function(...) {
+mod <- lm(...)
+modsum <- summary(mod)
+dfresid <- modsum$df
+cutetable <- tibble::tibble(
+  df_resid = dfresid[2],
+  r_squared = modsum$r.squared
+)
+cat("This table/dataframe solves assignment 2:")
+return(cutetable)
+}
+
+solve_assignment_2(mpg ~ wt, data = mtcars)
+
+# 4.4 Subsetting and assignment -------------------------------------------
+
+x <- 1:5
+x[c(1, 2)] <- c(101, 102)
+x
+
+x <- list(a = 1, b = 2)
+x[["b"]] <- NULL
+str(x)
+
+y <- list(a = 1, b = 2)
+y["b"] <- list(NULL)
+str(y)
+
+mtcars[] <- lapply(mtcars, as.integer)
+is.data.frame(mtcars)
+
+mtcars <- lapply(mtcars, is.integer)
+is.data.frame(mtcars)
+
+# 4.5 Applications --------------------------------------------------------
+
+# 4.5.1 Lookup tables (character subsetting) ------------------------------
+
+x <- c("m", "f", "u", "f", "f", "m", "m")
+lookup <- c(m = "Male", f = "Female", "u" = NA)
+lookup[x]
+unname(lookup[x])
+
+# 4.5.2 Matching and merging by hand (integer subsetting) -----------------
+
+grades <- c(1, 2, 2, 3, 1)
+
+info <- data.frame(
+  grade = 3:1,
+  desc = c("Exellent", "Good", "Poor"),
+  fail = c(T, T, F)
+)
+
+id <- match(grades, info$grade)
+id
+info[id, ]
+
+# 4.5.3 Random samples and bootstraps (integer subsetting) ----------------
+
+df <- data.frame(x = c(1, 2, 3, 1, 2), y = 5:1, z = letters[1:5])
+# Randomly reorder
+df[sample(nrow(df)), ]
+
+# Select 3 random rows
+df[sample(nrow(df), 3), ]
+
+# Select 6 bootstrap replicates
+df[sample(nrow(df), 6, replace = TRUE), ]
+
+# 4.5.4 Ordering (integer subsetting) -------------------------------------
+
+x <- c("b", "c", "a")
+order(x)
+x[order(x)]
+
+df2 <- df[sample(nrow(df)), 3:1]
+df2[order(df2$x), ]
+df2[ , order(names(df2))]
 

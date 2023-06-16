@@ -231,6 +231,14 @@ for (x in xs) {
 xs
 
 # Ans. I expected this to become c(1, 2, 3, 6).
+# I take the vector iterated to be c(xs, x * 2)
+# This obviously associates c(xs, xs[1]*2, xs[2]*2, xs[3]*2) with the
+# name xs. The entire for loop thus equals c(xs, xs*2).
+# This would have to do with for (x in xs).
+# Since seq_along(xs) and xs will do the same work, in this instance,
+# And results become as I thought when changing the out vectors name to xz,
+# this should mean that xs is simply updated. Which I should have thought
+# of instantly...
 
 # 3. What does the following code tell you about when the index is updated?
 
@@ -238,3 +246,9 @@ for (i in 1:3) {
     i <- i * 2
     print(i)
 }
+
+# I will answer this "in abstract" before checking out how it works out.
+# This loop should print three figures. 2, 4 and 6.'
+# And it did.
+# The (i in 1:3) sends first 1 into i*2, then 2, then 3.
+# Easy peasy.

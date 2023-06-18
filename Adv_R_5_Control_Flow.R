@@ -251,4 +251,38 @@ for (i in 1:3) {
 # This loop should print three figures. 2, 4 and 6.'
 # And it did.
 # The (i in 1:3) sends first 1 into i*2, then 2, then 3.
+
 # Easy peasy.
+
+## Quiz answers
+
+# 1. What is the difference between if and ifelse()?
+
+# Answer,
+
+# ifelse is a vectorized version of if. It's done in a function.
+# if can be paired with else, and is more flexible, escpecially if
+
+# 2.  In the following code, what will the value of y be if x is
+# TRUE? What if x is FALSE? What if x is NA?
+
+y <- if (x) 3
+
+if (T) 3
+if (F) 3
+if (NA) 3
+                                                                                                    if (NA) 3
+# Ans 3, no answer and error, for the cases x = T, x = F, nad x = NA.
+
+# 3. What does switch("x", x = , y = 2, z = 3) return?
+
+x <- c("x", "a", "y", "z", "a", "b", "c")
+x2 <- lapply(x, switch, x = , y = 2, z = 3)
+x2[unlist(lapply(x2, is.null))] <- list(NA)
+unlist(x2)
+?switch
+
+# Ans. They will return, from vector x, 2 for values "x" and "y", and 3 for
+# value "z".
+
+# WRONG! switch() works with length 1 vectors. You will get 2!!!

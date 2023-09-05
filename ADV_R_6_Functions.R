@@ -70,7 +70,8 @@ coocoo <- function(x) 4/x
 # Here I will try to find a way of remembering the name of a specific function
 # stored in the global environment.
 environment(nuts)
-
+rfrf <- mtcars
+utils::edit(rfrf)
 findfuncname <- function(test) {
 objs <- mget(ls(pos = 1L, all = TRUE), inherits = TRUE)
 funs <- Filter(is.function, objs)

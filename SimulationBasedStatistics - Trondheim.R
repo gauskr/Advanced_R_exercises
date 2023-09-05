@@ -1034,8 +1034,8 @@ ggplot(data = p05datos, aes(x=samplesize, y=significantpvalues))  +
 
 # d has a small bias, and a correction called Hedges' g is often used.
 
-# Playing with the following simulation we can see how g changes as a function of the difference between
-# means and sampling error.
+# Playing with the following simulation we can see how g changes as a function
+# of the difference between means and sampling error.
 
 nSims = 1000
 n=100
@@ -1070,8 +1070,11 @@ ggplot()  +
            xmin = (mean(hedgesgs)-(sd(hedgesgs)*1.96)),
            xmax = (mean(hedgesgs)+(sd(hedgesgs)*1.96)))
 
-# We are going to see how a real effect of a fixed size can give rise to both significant and non-significant p-values.
-# Let's simulate 10 experiments. We will use a common sample size of n=30 and common effect size of d=0.4.
+# We are going to see how a real effect of a fixed size can give rise to both
+# significant and non-significant p-values. Let's simulate 10 experiments. We
+# will use a common sample size of n=30 and common effect size of d=0.4.
+
+# My comm. the dance of the p-value, from meta analysis movement.
 
 nSims = 10
 n=30
@@ -1177,7 +1180,8 @@ ggplot()  +
 # This is input data for a meta-analysis. In a meta-analysis, the effect sizes
 # of the experiments are weighted by their precision (variability), and a
 # meta-analytic effect size is computed.
-# Let's see how a meta-analysis of these same 10 experiments looks like using the specific library.
+# Let's see how a meta-analysis of these same 10 experiments looks like using
+# the specific library.
 
 meta <- rma(hedgesgs,vi = varef[i])
 
@@ -1239,7 +1243,8 @@ metadata <- metadata %>%
 meta <- rma(metadata$significant,vi = metadata$esvars)
 
 forest(meta)
-
+?forest
+vignette(package = "metafor")
 
 ##### QUESTIONABLE RESEARCH PRACTICES AND PUBLICATION BIAS #####
 
@@ -1413,14 +1418,17 @@ meta <- rma(datos$significantpos,vi = datos$esvars)
 
 forest(meta)
 
-# We can see that when the samples are small, the estimated effect size is larger
-# (and remember that there is no real effect whatsoever in the population in these simulations).
+# We can see that when the samples are small, the estimated effect size is
+# larger (and remember that there is no real effect whatsoever in the
+# population in these simulations).
 
 
 ## OPTIONAL STOPPING IN DATA COLLECTION ##
 
-# Another questionable practice is called "optional stopping": collect a sample, check whether p is significant,
-# if not, collect another batch of data, check p again, stop if p is significant or carry on with data collection.
+# Another questionable practice is called "optional stopping": collect a
+# sample, check whether p is significant, if not, collect another batch of
+# data, check p again, stop if p is significant or carry on with data
+# collection.
 
 # Let's see how this practice increases the false alarm rate.
 
@@ -1523,7 +1531,8 @@ ggplot()  +
 # be the participant with the most extreme value in the direction that favours a greater difference
 # between the means. Its value will be replaced by the mean value of the group (a common practice).
 
-# Let's start using large samples. In these simulations there is no real effect in the population.
+# Let's start using large samples. In these simulations there is no real
+# effect in the population.
 
 nSims = 10000
 n=100
@@ -1653,9 +1662,62 @@ ggplot(data = FAdatos, aes(x=samplesize, y=FAvaluesmean, ymin=FAvaluesminCI, yma
   geom_hline(yintercept=5, colour="black", linetype="dashed") +
   annotate("text", x = 5, hjust = "left", y = 7, label = "5% false alarms")
 
+## Correlational designs.
+## Do the same simulations ...
 
+## multivariate...
 
+## play with it...
 
+## Find a way to ask the Q: "Is these particular issues equally or more problematic
+# in correlational designs?"
 
+# Plan ahead and follow your plan.
+# Restrict experimenters freedom.
+# Pre-registration of hypotheses
+# design, conditions and measures
+# analysis and critical tests
+# trimming and pre-prosessing of data
+# objective criteria for subject and data removal
+# expected effect size and required sample size to detect it with a given
+# statistical power.
+# data collection stopping rules.
+# Check several time as long as the total alpha level is below 5%.
 
+# Public protocol.
+# check aspredicted.com
+
+# aspredicted is more precise than putting protocols into papers.
+# If not sticking to this... having to argue.
+
+# Exploratory findings... p-values doesn't make much sense in explorative
+# analysis.
+# Confirmatory
+
+# If you want to present a non-finding, make sure you had enough power.
+# sort of sandwich t-test
+# significantly different from...
+# set your sample size ... significantly smaller than the smallest effect of
+# interest.
+
+# fidelity - do people do what we ask them to do.
+# case analysis. Effect of doers or non-doers. Exclusion criteria.
+# predict control doer... case analysis, predict T and C. Subjective criteria..
+# false alarm rate shouldn't be affected by this.
+
+# Share material... Sharing materials, code, data.
+# OSF.io sharing etc. same as above.
+
+# Remove publication bias.
+
+# Chris Chambers. Registered Reports. Cortex.
+# Get rewiers to review procedures.
+
+# You will be published no matter what you get.
+# peercommunity.org PCIRR.
+
+# Then, can't I explore?
+# Distinguish clearly between confirmatory vs. exploratory research.
+# In exploration, p-values are a mere hint.
+# Exploratory research must be followed by confirmatory research.
 

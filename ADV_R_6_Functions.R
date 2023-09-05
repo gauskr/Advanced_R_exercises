@@ -113,8 +113,22 @@ semantically_equivalent(function(x) mean(c(1,5)))() # 3
 # anonymous function instead of a named function? Where should you have used
 # a named function instead of an anonymous function?
 
+# I haven't really used a lot of anonymous functions. Only in exercises like this.
+# The first issue, that of actually using them, is the issue to review for me.
+# Sometimes I make
+luniq <- function(x) unique(length(x))
+# Then I do things like
+lapply(mtcars, luniq)
+# I guess I could just have
+lapply(mtcars, function(x) unique(length(x)))
+# It's a bit more typing, but it will make the code more readable for cats that
+# know R-code, but not necessarily have the time to read up on my wrappers.
+
 # 4. What function allows you to tell if an object is a function? What function
 # allows you to tell if a function is a primitive function?
+
+# is.functions allows to tell wether a object is a function.
+is.function(nuts)
 
 # 5. This code makes a list of all functions in the base package.
 

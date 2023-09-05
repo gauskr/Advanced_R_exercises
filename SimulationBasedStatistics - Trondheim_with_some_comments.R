@@ -9,7 +9,16 @@ library(pwr) # for analytical statistical power computations
 library(metafor) # for meta-analysis
 
 options(digits=3,scipen=999)
+1:6
+c(4:6,4:2)
 
+a <- cor(1:6, c(4:6, 4:2))
+plot(1:6, c(4:6,4:2))
+
+?geom_line
+
+tibble(x = 1:6, y = c(4:6, 4:2)) |>
+  ggplot(aes(x = x, y = y)) + geom_smooth() + geom_abline(color = "red", slope = a)
 
 ##### BASIC CONCEPTS: DESCRIPTIVE STATISTICS #####
 

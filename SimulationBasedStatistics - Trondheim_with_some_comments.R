@@ -3,7 +3,7 @@ library(dplyr) # library for basic data management
 library(ggplot2) # graphic libraries
 library(ggthemes)
 library(effsize) # to compute effect sizes
-install.packages("pwr")
+# install.packages("pwr")
 library(faux) # for multivariate random generation
 library(pwr) # for analytical statistical power computations
 library(metafor) # for meta-analysis

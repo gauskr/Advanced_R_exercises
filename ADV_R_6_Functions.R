@@ -822,14 +822,756 @@ mean.default
 # in mean, however, ... refers to something else. Probably from the .Internal
 ?mean
 # "further arguments passed to or from other methods."
-# It clearly relates to something else. Also, the numbers touch trim and na.rm,
-# but this doesn't affect results in this instance, even though they are beyond
-# bounds. Have to check code to understand this.
+# It clearly relates to something else. Also, the numbers touch trim
+# and na.rm, but this doesn't affect results in this instance, even
+# though they are beyond bounds. Have to check code to understand
+# this.
 
-# 2. Explain how to find the documentation for the named arguments in the
-# following function call:
+# 2. Explain how to find the documentation for the named arguments
+# in the following function call:
 
 plot(1:10, col = "red", pch = 20, xlab = "x", col.lab = "blue")
+?plot
+toy_plot <- function(col, pch, xlab, col.lab) {
+  plot(1:10, col = "red", pch = 20, xlab = "x", col.lab = "blue")
+}
+# Ans. to find documentation for these named arguments (col, pch, xlab,
+# col.lab), one can either click via plot(), or write
+?`graphical parameter`
+# to find the help page from par{graphics} called
+# "Set or Query Graphical Parameters".
 
-# Why does plot(1:10, col = "red") only colour the points, not the axes or
-# labels? Read the source code of plot.default() to find out.
+# col is A specification for the default plotting color. One can see
+# section ‘Color Specification’, in the same document,
+# for further details.
+# Some functions such as lines and text accept a vector of values
+# which are recycled and may be interpreted slightly differently.
+# Colors can be specified in several different ways. The simplest
+# way is with a character string giving the color name
+# (e.g., "red"), as in the example above. A list of the possible
+# colors can be obtained with the function colors. Alternatively,
+# colors can be specified directly in terms of their RGB components
+# with a string of the form "#RRGGBB" where each of the pairs RR,
+# GG, BB consist of two hexadecimal digits giving a value in the
+# range 00 to FF. Colors can also be specified by giving an index
+# into a small table of colors, the palette: indices wrap round so
+# with the default palette of size 8, 10 is the same as 2. This
+# provides compatibility with S. Index 0 corresponds to the
+# background color. Note that the palette (apart from 0 which is
+# per-device) is a per-session setting.
+colors() # this gives a list of 657 colors to choose from.
+# Thees apply to col.lab as well
+# col.lab
+# The color to be used for x and y labels. Defaults to "black".
+
+toy_plot(col = "wheat")
+plot(1:10, col = "wheat3", pch = 20, xlab = "x", col.lab = "yellow4")
+plot(1:10, col = "#110199", pch = 20, xlab = "x", col.lab = "#975321")
+
+# pch
+# is also a graphical parameter, with documentation at the same place
+# /page as col and col.lab.
+# pch should be either an integer specifying a symbol or a single
+# character to be used as the default in plotting points. See points
+# for possible values and their interpretation. And note that only
+# integers and single-character strings can be set as a graphics
+# parameter (and not NA nor NULL). Some functions such as points
+# accept a vector of values which are recycled
+?points()
+# there are 25 different shapes for point, here's a few examples:
+plot(1:10, col = "skyblue2", pch = 11, xlab = "x", col.lab = "green3")
+# 11 is combined with skyblue2 is kosher while
+plot(1:10, col = "red4", pch = 23, xlab = "x", col.lab = "#975321")
+# ain't square.
+
+# The above arguments can be found via graphical parameters, as
+# described, but xlab is found directly in ?plot:
+# xlab
+# a title for the x axis: see title.
+?title
+# title, however, is also from graphics:
+# xlab
+# X axis label using font, size and color par(c("font.lab",
+# "cex.lab", "col.lab")).
+# Above we already saw the col.lab - which changes the color of
+# x lab (the same applies to ylab). One could also change font and
+# size, using font.lab and cex.lab
+??font.lab
+
+# 3. Why does plot(1:10, col = "red") only colour the points, not
+# the axes or labels? Read the source code of plot.default() to find
+# out.
+
+plot(1:10, col = "red")
+?plot.default
+# Well it does now...
+# Inside the code plot() does
+xlabel <- if (!missing(x)) # This is why we HAVE x-label!
+deparse1(substitute(x))
+# It does something similar for the y-axis. Will consult solutions
+# book:
+
+# To learn about the internals of plot.default() we add browser() to
+# the first line of the code and interactively run
+# plot(1:10, col = "red"). This way we can see how the plot is built
+# and learn where the axes are added.
+
+
+new_plot <- function (x, y = NULL, type = "p", xlim = NULL, ylim = NULL,
+          log = "", main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
+          ann = par("ann"), axes = TRUE, frame.plot = axes, panel.first = NULL,
+          panel.last = NULL, asp = NA, xgap.axis = NA, ygap.axis = NA,
+          ...)
+{
+  browser()
+  localAxis <- function(..., col, bg, pch, cex, lty, lwd) Axis(...)
+  localBox <- function(..., col, bg, pch, cex, lty, lwd) box(...)
+  localWindow <- function(..., col, bg, pch, cex, lty, lwd) plot.window(...)
+  localTitle <- function(..., col, bg, pch, cex, lty, lwd) title(...)
+  xlabel <- if (!missing(x))
+    deparse1(substitute(x))
+  ylabel <- if (!missing(y))
+    deparse1(substitute(y))
+  xy <- xy.coords(x, y, xlabel, ylabel, log)
+  xlab <- if (is.null(xlab))
+    xy$xlab
+  else xlab
+  ylab <- if (is.null(ylab))
+    xy$ylab
+  else ylab
+  xlim <- if (is.null(xlim))
+    range(xy$x[is.finite(xy$x)])
+  else xlim
+  ylim <- if (is.null(ylim))
+    range(xy$y[is.finite(xy$y)])
+  else ylim
+  dev.hold()
+  on.exit(dev.flush())
+  plot.new()
+  localWindow(xlim, ylim, log, asp, ...)
+  panel.first
+  plot.xy(xy, type, ...)
+  panel.last
+  if (axes) {
+    localAxis(if (is.null(y))
+      xy$x
+      else x, side = 1, gap.axis = xgap.axis, ...)
+    localAxis(if (is.null(y))
+      x
+      else y, side = 2, gap.axis = ygap.axis, ...)
+  }
+  if (frame.plot)
+    localBox(...)
+  if (ann)
+    localTitle(main = main, sub = sub, xlab = xlab, ylab = ylab,
+               ...)
+  invisible()
+}
+new_plot(1:10, col = "red")
+# Ok, so I misinterpreted the question! Working late, long and hard...
+?title
+title
+# The call to localTitle() passes the col parameter as part of
+# the ... argument to title(). ?title tells us that the title()
+# function specifies four parts of the plot: Main (title of the
+# plot), sub (sub-title of the plot) and both axis labels.
+# Therefore, it would introduce ambiguity inside title() to use col
+# directly. Instead, one has the option to supply col via the ...
+# argument, via col.lab or as part of xlab in the form
+# xlab = list(c("index"), col = "red") (similar for ylab).
+
+# 6.7 Exiting a function --------------------------------------------------
+
+# 6.7.1 Implicit versus explicit returns ----------------------------------
+
+# There are two ways that a function can return a value:
+
+# Implicitly, where the last evaluated expression is the return
+# value:
+
+j01 <- function(x) {
+  if (x < 10) {
+    0
+  } else {
+    10
+  }
+}
+j01(5)
+j01(15)
+
+# Explicitly, by calling return():
+
+j02 <- function(x) {
+  if (x < 10) {
+    return(0)
+  } else {
+    return(10)
+  }
+}
+
+# 6.7.2 Invisible values --------------------------------------------------
+
+# Most functions return visibly: calling the function in an
+# interactive context prints the result.
+
+j03 <- function() 1
+j03()
+
+# However, you can prevent automatic printing by applying
+# invisible() to the last value:
+
+j04 <- function() invisible(1)
+j04()
+print(j04())
+(j04())
+withVisible(j04())
+
+# The most common function that returns invisibly is <-:
+a <- 2
+(a <- 2)
+# This is what makes it possible to chain assignments:
+a <- b <- c <- d <- 2
+
+# In general, any function called primarily for a side effect
+# (like <-, print(), or plot()) should return an invisible value
+# (typically the value of the first argument).
+
+# 6.7.3 Errors
+
+# If a function cannot complete its assigned task, it should throw
+# an error with stop(), which immediately terminates the execution
+# of the function.
+
+j05 <- function() {
+  stop("I'm an error!")
+  return(10)
+}
+j05()
+
+# An error indicates that something has gone wrong, and forces the
+# user to deal with the problem. Some languages
+# (like C, Go, and Rust) rely on special return values to indicate
+# problems, but in R you should always throw an error. You’ll learn
+# more about errors, and how to handle them, in Chapter 8.
+
+# 6.7.4 Exit handlers -----------------------------------------------------
+
+# Sometimes a function needs to make temporary changes to the
+# global state. But having to cleanup those changes can be painful
+# (what happens if there’s an error?). To ensure that these changes
+# are undone and that the global state is restored no matter how a
+# function exits, use on.exit() to set up an exit handler. The
+# following simple example shows that the exit handler is run
+# regardless of whether the function exits normally or with an
+# error.
+
+j06 <- function(x) {
+  cat("Hello\n")
+  on.exit(cat("Goodbye!\n"), add = TRUE)
+  if (x) {
+    10
+  } else {
+    stop("Error")
+  }
+}
+
+j06(TRUE)
+j06(FALSE)
+
+# Always set add = TRUE when using on.exit(). If you don’t, each
+# call to on.exit() will overwrite the previous exit handler. Even
+# when only registering a single handler, it’s good practice to set
+# add = TRUE so that you won’t get any unpleasant surprises if you
+# later add more exit handlers.
+
+# on.exit() is useful because it allows you to place clean-up code
+# directly next to the code that requires clean-up:
+
+cleanup <- function(dir, code) {
+  old_dir <- setwd(dir)
+  on.exit(setwd(old_dir), add = TRUE)
+
+  old_opt <- options(stringsAsFactors = FALSE)
+  on.exit(options(old_opt), add = TRUE)
+}
+
+# Coupled with lazy evaluation, this creates a very useful pattern
+# for running a block of code in an altered environment:
+
+with_dir <- function(dir, code) {
+  old <- setwd(dir)
+  on.exit(setwd(old), add = TRUE)
+
+  force(code)
+}
+
+getwd()
+with_dir("~", getwd()) # good thing that didn't alter the
+# working environment! Thank you with_dir!
+
+# The use of force() isn’t strictly necessary here as simply
+# referring to code will force its evaluation. However, using
+# force() makes it very clear that we are deliberately forcing the
+# execution. You’ll learn other uses of force() in Chapter 10.
+
+# The withr package41 provides a collection of other functions for
+# setting up a temporary state.
+
+# In R 3.4 and earlier, on.exit() expressions are always run in
+# order of creation:
+
+j08 <- function() {
+  on.exit(message("a"), add = TRUE)
+  on.exit(message("b"), add = TRUE)
+}
+j08()
+
+# This can make cleanup a little tricky if some actions need to
+# happen in a specific order; typically you want the most recent
+# added expression to be run first. In R 3.5 and later, you can
+# control this by setting after = FALSE:
+
+j09 <- function() {
+  on.exit(message("a"), add = TRUE, after = FALSE)
+  on.exit(message("b"), add = TRUE, after = FALSE)
+}
+j09()
+
+# 6.7.5 Exercises ---------------------------------------------------------
+
+# 1. What does load() return? Why don’t you normally see these
+# values?
+
+?load
+
+## save all data
+xx <- pi # to ensure there is some data
+save(list = ls(all.names = TRUE), file= "all.rda")
+rm(xx)
+xx
+## restore the saved values to the current environment
+local({
+  load("all.rda")
+  ls()
+})
+
+xx <- exp(1:3)
+## restore the saved values to the user's workspace
+load("all.rda") ## which is here *equivalent* to
+## load("all.rda", .GlobalEnv)
+## This however annihilates all objects in .GlobalEnv with the same names !
+xx # no longer exp(1:3)
+rm(xx)
+attach("all.rda") # safer and will warn about masked objects w/ same name in .GlobalEnv
+ls(pos = 1)
+xx
+##  also typically need to cleanup the search path:
+detach("file:all.rda")
+
+## clean up (the example):
+unlink("all.rda")
+
+# load(), then, loads R-data into an environment.
+?readRDS()
+readRDS
+
+new_load <- function (file, envir = parent.frame(), verbose = FALSE)
+{
+  browser()
+  if (is.character(file)) {
+    con <- gzfile(file)
+    on.exit(close(con))
+    magic <- readChar(con, 5L, useBytes = TRUE)
+    if (!length(magic))
+      stop("empty (zero-byte) input file")
+    if (!grepl("RD[ABX][2-9]\n", magic)) {
+      if (grepl("RD[ABX][2-9]\r", magic))
+        stop("input has been corrupted, with LF replaced by CR")
+      warning(sprintf("file %s has magic number '%s'\n",
+                      sQuote(basename(file)), gsub("[\n\r]*", "", magic)),
+              "  ", "Use of save versions prior to 2 is deprecated",
+              domain = NA, call. = FALSE)
+      return(.Internal(load(file, envir)))
+    }
+  }
+  else if (inherits(file, "connection")) {
+    con <- if (inherits(file, "gzfile") || inherits(file,
+                                                    "gzcon"))
+      file
+    else gzcon(file)
+  }
+  else stop("bad 'file' argument")
+  if (verbose)
+    cat("Loading objects:\n")
+  .Internal(loadFromConn2(con, envir, verbose))
+}
+
+new_load("all.rda")
+rm("new_load")
+?readChar
+?gzfile
+## Hm... don't get it..
+# returns to ?load...
+
+# There it is:
+
+# Value
+# A character vector of the names of objects created, invisibly.
+
+# So.. the answer is load() creates R-objects from a file etc.
+# We don't see these values because the vector of object-names
+# is created invisibly. Just like `<-`. I don't understand how,
+# but it might have something to do with what's going on in the
+# internernals, since load is built around a corresponding internal
+# function.
+
+# 2. What does write.table() return? What would be more useful?
+?write.table
+# write.table prints its required argument x (after converting it
+# to a data frame if it is not one nor a matrix) to a file or
+# connection.
+
+# Since we have ways to create dataframes, it would be more useful
+# if write.table didn't force this? But instead returned an error?
+# Is my humble guess.
+# Let's check the solutions!
+
+# A: write.table() writes an object, usually a data frame or a
+# matrix, to disk. The function invisibly returns NULL. It would be
+# more useful if write.table() would (invisibly) return the input
+# data, x. This would allow to save intermediate results and
+# directly take on further processing steps without breaking the
+# flow of the code (i.e. breaking it into different lines). One
+# package which uses this pattern is the {readr} package,12 which
+# is part of the tidyverse-ecosystem.
+
+# Ok... so... I could have gotten a better answer by trying to write
+# something and put it into an object.
+
+test <- write.table(1:10, "stupid.txt")
+test
+unlink("stupid.txt")
+
+# 3. How does the chdir parameter of source() compare to with_dir()?
+# Why might you prefer one to the other?
+
+?source
+source
+
+# source() includes this snippet:
+owd <- getwd()
+if (is.null(owd))
+  stop("cannot 'chdir' as current directory is unknown")
+on.exit(setwd(owd), add = TRUE)
+
+# This seem risky, if it's a new code/function. By doing stop
+# before on.exit, as source() does, one risk doing harm before
+# making it ok. One could also set this at the beginning of the
+# script. That sounds like a better pattern to follow. Let's check
+# the solutions...
+
+# with_dir() takes a path for a working directory (dir) as its
+# first argument. This is the directory where the provided code
+# (code) should be executed. Therefore, the current working
+# directory is changed in with_dir() via setwd(). Then, on.exit()
+# ensures that the modification of the working directory is reset
+# to the initial value when the function exits. By passing the path
+# explicitly, the user has full control over the directory to
+# execute the code in.
+# In source() the code is passed via the file argument (a path to a
+# file). The chdir argument specifies if the working directory
+# should be changed to the directory containing the file. The
+# default for chdir is FALSE, so you don’t have to provide a value.
+# However, as you can only provide TRUE or FALSE, you are also less
+# flexible in choosing the working directory for the code execution.
+
+# Ok. That's more detailed than me...
+
+# 4. Write a function that opens a graphics device, runs the
+# supplied code, and closes the graphics device (always, regardless
+# of whether or not the plotting code works).
+getOption("device")
+#grDevices::dev.new()
+?dev.new
+#dev.cur()
+
+func_that_opens_device_and_closes_it <- function(x, y = x, sleep = 7 ...) {
+if (!is.numeric(x)) {
+  warning("\nHa ha!\nYour code didn't work:)!\nI just did 1:5 plot instead... sucker!")
+  plot(1:5)
+} else {
+  message("\nYou're doing fine, my dear padawan!\nHugs and kisses!")
+plot(x, y, ...)
+}
+Sys.sleep(sleep)
+on.exit(grDevices::graphics.off(), add = TRUE)
+}
+
+func_that_opens_device_and_closes_it("dfdf", sleep = 3)
+func_that_opens_device_and_closes_it(1:100, sleep = 3) # Hm...
+
+# 5. We can use on.exit() to implement a simple version of
+# capture.output().
+capture.output
+?capture.output
+getwd()
+capture.output2 <- function(code) {
+  setwd("C:/Users/gauteskr/Advanced_R_exercises")
+  temp <- tempfile()
+  on.exit(unlink(temp), add = TRUE, after = TRUE)
+  sink(temp)
+  on.exit(sink(), add = TRUE, after = TRUE)
+  force(code)
+  on.exit(unlink(temp), add = TRUE, after = TRUE)
+  readLines(temp)
+}
+?force
+force(c(1+1, 2+2))
+?sink
+?tempfile
+?tempdir
+tempfile(tmpdir = getwd())
+
+capture.output2(cat("a", "b", "c", sep = "\n"))
+capture.output(cat("a" , "b", "c", sep = "\n")) # same...
+
+
+# Compare capture.output() to capture.output2(). How do the
+# functions differ? What features have I removed to make the key
+# ideas easier to see? How have I rewritten the key ideas so they’re
+# easier to understand?
+
+?capture.output()
+
+require(stats)
+glmout <- capture.output(summary(glm(case ~ spontaneous+induced,
+                                     data = infert, family = binomial())))
+glmout[1:5]
+capture.output(1+1, 2+2)
+capture.output({1+1; 2+2})
+capture.output
+glmout <- capture.output2(summary(glm(case ~ spontaneous+induced,
+                                     data = infert, family = binomial())))
+glmout[1:5]
+capture.output2(1+1, 2+2)
+capture.output2({1+1; 2+2})
+force(1, 2+4)
+
+# Wickhams function, due to force(), can't do two arguments at once.
+# Also, it doesn't return output. However, it hghlights how sink()
+# is used to capture stuff, put it into a file.
+
+# Wickham kind of say "you put these three into a temp-file, and then
+# read it back in, before deleting the tempfile". That's
+# pedagogical!
+
+# 6.8 Function forms ------------------------------------------------------
+
+# To understand computations in R, two slogans are helpful:
+
+# Everything that exists is an object.
+# Everything that happens is a function call.
+# — John Chambers
+
+# While everything that happens in R is a result of a function call,
+# not all calls look the same. Function calls come in four
+# varieties:
+
+# prefix: the function name comes before its arguments, like
+# foofy(a, b, c). These constitute of the majority of function
+# calls in R.
+
+# infix: the function name comes in between its arguments, like
+# x + y. Infix forms are used for many mathematical operators, and
+# for user-defined functions that begin and end with %.
+
+# replacement: functions that replace values by assignment, like
+# names(df) <- c("a", "b", "c"). They actually look like prefix
+# functions.
+
+# special: functions like [[, if, and for. While they don’t have a
+# consistent structure, they play important roles in R’s syntax.
+
+# While there are four forms, you actually only need one because
+# any call can be written in prefix form.
+
+# 6.8.1 Rewriting to prefix form ------------------------------------------
+
+# An interesting property of R is that every infix, replacement, or
+# special form can be rewritten in prefix form. Doing so is useful
+# because it helps you better understand the structure of the
+# language, it gives you the real name of every function, and it
+# allows you to modify those functions for fun and profit.
+
+# The following example shows three pairs of equivalent calls,
+# rewriting an infix form, replacement form, and a special form
+# into prefix form.
+
+x + y
+`+`(x, y)
+
+names(df) <- c("x", "y", "z")
+`names<-`(df, c("x", "y", "z"))
+
+for (i in 1:10) print(i)
+`for`(i, 1:10, print(i))
+
+# Suprisingly, in R, for can be called like a regular function! The
+# same is true for basically every operation in R, which means that
+# knowing the function name of a non-prefix function allows you to
+# override its behaviour. For example, if you’re ever feeling
+# particularly evil, run the following code while a friend is away
+# from their computer. It will introduce a fun bug: 10% of the
+# time, it will add 1 to any numeric calculation inside the
+# parentheses.
+
+`(` <- function(e1) {
+  if (is.numeric(e1) && runif(1) < 0.1) {
+    e1 + 1
+  } else {
+    e1
+  }
+}
+
+replicate(50, (1+2))
+
+rm(`(`)
+
+# Of course, overriding built-in functions like this is a bad idea,
+# but, as you’ll learn in Section 21.2.5, it’s possible to apply it
+# only to selected code blocks. This provides a clean and elegant
+# approach to writing domain specific languages and translators to
+# other languages.
+
+# A more useful application comes up when using functional
+# programming tools. For example, you could use lapply() to add 3
+# to every element of a list by first defining a function add():
+
+add <- function(x, y) x + y
+lapply(list(1:4, 4:5), add, 3)
+
+# But we can also get the same result simply by relying on the
+# existing + function:
+
+lapply(list(1:4, 4:5), `+`, 3)
+
+# We’ll explore this idea in detail in Section 9.
+
+# 6.8.2 Prefix form -------------------------------------------------------
+
+# The prefix form is the most common form in R code, and indeed in
+# the majority of programming languages. Prefix calls in R are a
+# little special because you can specify arguments in three ways:
+
+# By position, like help(mean).
+# Using partial matching, like help(top = mean).
+# By name, like help(topic = mean).
+# As illustrated by the following chunk, arguments are matched by
+# exact name, then with unique prefixes, and finally by position.
+
+k01 <- function(abcdef, bcde1, bcde2) {
+  list(a = abcdef, b1 = bcde1, b2 = bcde2)
+}
+
+str(k01(1, 2, 3))
+str(k01(2, 3, abcdef = 1))
+# Can abbreviate long argument names:
+str(k01(2, 3, a = 1))
+# But this doesn't work because abbreviation is ambiguous
+str(k01(1, 3, b = 1)) #ERROR
+
+# In general, use positional matching only for the first one or two
+# arguments; they will be the most commonly used, and most readers
+# will know what they are. Avoid using positional matching for less
+# commonly used arguments, and never use partial matching.
+# Unfortunately you can’t disable partial matching, but you can
+# turn it into a warning with the warnPartialMatchArgs option:
+
+options(warnPartialMatchArgs = TRUE)
+str(k01(a = 1, 2, 3))
+
+# 6.8.3 Infix functions ---------------------------------------------------
+
+# Infix functions get their name from the fact the function name
+# comes in between its arguments, and hence have two arguments. R
+# comes with a number of built-in infix operators: :, ::, :::, $,
+# @, ^, *, /, +, -, >, >=, <, <=, ==, !=, !, &, &&, |, ||, ~, <-,
+# and <<-. You can also create your own infix functions that start
+# and end with %. Base R uses this pattern to define
+# %%, %*%, %/%, %in%, %o%, and %x%.
+
+# Defining your own infix function is simple. You create a two
+# argument function and bind it to a name that starts and ends with
+# %:
+
+`%+%` <- function(x, y) paste(x, y)
+"new" %+% "string"
+
+# The names of infix functions are more flexible than regular R
+# functions: they can contain any sequence of characters except
+# for %. You will need to escape any special characters in the
+# string used to define the function, but not when you call it:
+
+`% %` <- function(a, b) paste(a, b)
+`%/\\%` <- function(a, b) paste(a, b)
+"a" % % "b"
+"a" %/\% "b"
+
+# R’s default precedence rules mean that infix operators are
+# composed left to right:
+
+`%-%` <- function(a, b) paste("(", a, " %-% ", b, ")")
+"a" %-% "b" %-% "c"
+
+# There are two special infix functions that can be called with a
+# single argument: + and -.
+
+-1
++10
+
+# 6.8.4 Replacement functions ---------------------------------------------
+
+# Replacement functions act like they modify their arguments in
+# place, and have the special name xxx<-. They must have arguments
+# named x and value, and must return the modified object. For
+# example, the following function modifies the second element of a
+# vector:
+
+`second<-` <- function(x, value) {
+  x[2] <- value
+  x
+}
+
+# Replacement functions are used by placing the function call on
+# the left side of <-:
+
+x <- 1:10
+second(x) <- 5L
+x
+
+# I say they act like they modify their arguments in place, because,
+# as explained in Section 2.5, they actually create a modified copy.
+# We can see that by using tracemem():
+
+x <- 1:10
+tracemem(x)
+second(x) <- 6L
+
+# If your replacement function needs additional arguments, place
+# them between x and value, and call the replacement function with
+# additional arguments on the left:
+`modify<-` <- function(x, position, value) {
+  x[position] <- value
+  x
+}
+modify(x, 1) <- 10
+x
+
+# When you write modify(x, 1) <- 10, behind the scenes R turns it
+# into:
+
+x <- `modify<-`(x, 1, 10)
+
+# Combining replacement with other functions requires more complex
+# translation. For example:
+

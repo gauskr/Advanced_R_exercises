@@ -1575,3 +1575,128 @@ x <- `modify<-`(x, 1, 10)
 # Combining replacement with other functions requires more complex
 # translation. For example:
 
+x <- c(a = 1, b = 2, c = 3)
+names(x)
+names(x)[2] <- "two"
+names(x)
+
+# is translated into:
+`*tmp*` <- x
+x <- `names<-`(`*tmp*`, `[<-`(names(`*tmp*`), 2, "two"))
+rm(`*tmp*`)
+
+# (Yes, it really does create a local variable named *tmp*, which
+# is removed afterwards.)
+
+# 6.8.5 Special forms -----------------------------------------------------
+
+# Finally, there are a bunch of language features that are usually
+# written in special ways, but also have prefix forms. These include
+# parentheses:
+
+# (x) (`(`(x))
+# {x} (`{`(x)).
+
+# The subsetting operators:
+
+#  x[i] (`[`(x, i))
+#  x[[i]] (`[[`(x, i))
+
+# And the tools of control flow:
+
+# if (cond) true (`if`(cond, true))
+# if (cond) true else false (`if`(cond, true, false))
+# for(var in seq) action (`for`(var, seq, action))
+# while(cond) action (`while`(cond, action))
+# repeat expr (`repeat`(expr))
+# next (`next`())
+# break (`break`())
+
+# Finally, the most complex is the function function:
+
+# function(arg1, arg2) {body}
+# (`function`(alist(arg1, arg2), body, env))
+
+# Knowing the name of the function that underlies a special form is
+# useful for getting documentation: ?( is a syntax error; ?`(` will
+# give you the documentation for parentheses.
+
+# All special forms are implemented as primitive functions (i.e. in
+# C); this means printing these functions is not informative:
+
+`for`
+
+# 6.8.6 Exercises ---------------------------------------------------------
+
+# 1. Rewrite the following code snippets into prefix form:
+
+1 + 2 + 3
+1 + (2 + 3)
+if (length(x) <= 5) x[[5]] else x[[n]]
+
+# 2. Clarify the following list of odd function calls:
+
+x <- sample(replace = TRUE, 20, x = c(1:10, NA))
+y <- runif(min = 0, max = 1, 20)
+cor(m = "k", y = y, u = "p", x = x)
+
+# 3. Explain why the following code fails:
+
+modify(get("x"), 1) <- 10
+
+# 4. Create a replacement function that modifies a random location
+# in a vector.
+
+# 5. Write your own version of + that pastes its inputs together if
+# they are character vectors but behaves as usual otherwise. In
+# other words, make this code work:
+
+1 + 2
+"a" + "b"
+
+# 6. Create a list of all the replacement functions found in the
+# base package. Which ones are primitive functions? (Hint: use
+# apropos().)
+
+# 7. What are valid names for user-created infix functions?
+
+# 8. Create an infix xor() operator.
+
+# 9. Create infix versions of the set functions intersect(),
+# union(), and setdiff(). You might call them %n%, %u%, and %/% to
+# match conventions from mathematics.
+
+# QUIZ --------------------------------------------------------------------
+
+# Answer the following questions to see if you can safely skip this chapter. You can find the answers in Section 6.9.
+
+# What are the three components of a function?
+
+# What does the following code return?
+
+x <- 10
+f1 <- function(x) {
+  function() {
+    x + 10
+  }
+}
+f1(1)()
+
+# How would you usually write this code?
+
+`+`(1, `*`(2, 3))
+
+# How could you make this call easier to read?
+
+mean(, TRUE, x = c(1:10, NA))
+
+# Does the following code throw an error when executed? Why or why not?
+
+f2 <- function(a, b) {
+    a * 10
+  }
+f2(10, stop("This is an error!"))
+
+# What is an infix function? How do you write it? What’s a replacement function? How do you write it?
+
+# How do you ensure that cleanup action occurs regardless of how a function exits?

@@ -1703,16 +1703,20 @@ rm(get)
 # 4. Create a replacement function that modifies a random location
 # in a vector.
 
-`randmod<-` <- function(x, position = modthis, new) {
+`randmod<-` <- function(x, value) {
 modthis <- sample(length(x), 1)
-x[modthis] <<- new
-}
+x[modthis] <- value
 x
-`randmod<-`(x, 11)
-rm(randmod)
-`randmod<-`(x) <- 11
+}
+x <- rep(11, 10)
+y <- 0
+while (sum(x == c(1:10)) != 10) { # make yourself a cup of coffee...
+randmod(x) <- sample(1:10, 1)
+y <- y + 1
+} # ... or just abort it.
+y
 randmod(x) <- 11
-names(x) <- c("a", "b")
+x
 
 # 5. Write your own version of + that pastes its inputs together if
 # they are character vectors but behaves as usual otherwise. In
@@ -1720,10 +1724,27 @@ names(x) <- c("a", "b")
 
 1 + 2
 "a" + "b"
-
+rm(`+`)
+add <- `+`
+add(4,5)
+`+` <- function(x, y) {
+  if (is.character(x) && is.character(y)) {
+   stringr::str_c(x, y, collapse = "")
+  } else if (is.numeric(x) && is.numeric(y)) {
+    add(x, y)
+  } else {
+    error("These vectors cannot be added.\n
+          Are you sure they are both either numerical or character?")
+  }
+}
+"a" + "bhf"
+3+6
+add
+`+`
 # 6. Create a list of all the replacement functions found in the
 # base package. Which ones are primitive functions? (Hint: use
 # apropos().)
+apropos
 
 # 7. What are valid names for user-created infix functions?
 

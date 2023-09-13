@@ -9,11 +9,11 @@ library(pwr) # for analytical statistical power computations
 library(metafor) # for meta-analysis
 
 options(digits=3,scipen=999)
-1:6
-c(4:6,4:2)
+#1:6
+#c(4:6,4:2)
 
-a <- cor(1:6, c(4:6, 4:2))
-plot(1:6, c(4:6,4:2))
+#a <- cor(1:6, c(4:6, 4:2))
+#plot(1:6, c(4:6,4:2))
 
 ?geom_line
 
@@ -25,13 +25,16 @@ tibble(x = 1:6, y = c(4:6, 4:2)) |>
 # Imagine we measure the intelligence (IQ) of a sample of people.
 
 n=10 # We set sample size.
-M=100 # We set poblational mean (the mean of the whole population if we could assess everybody).
-SD=15 # We set populational variability (measured by the Standard Deviation).
+M=100 # We set poblational mean (the mean of the whole population
+# if we could assess everybody).
+SD=15 # We set populational variability (measured by the Standard
+# Deviation).
 
-datosx<-rnorm(n = n, mean = M, sd = SD) # We extract data randomly from the population,
-# assuming a normal distribution and the mean and SD that we have set.
-datosy<-rep(0,n) # Do not pay attention to this instruction. It only helps to
-# produce the chart later on.
+datosx<-rnorm(n = n, mean = M, sd = SD) # We extract data randomly
+# from the population, assuming a normal distribution and the mean
+# and SD that we have set.
+datosy<-rep(0,n) # Do not pay attention to this instruction. It
+# only helps to produce the chart later on.
 datos<-data.frame(datosx,datosy)
 datos
 # plot data points
@@ -70,7 +73,8 @@ ggplot(datos, aes(datosx))  +
   annotate("text", x = 150, y = 0.07, hjust = "right", label = paste("NExps=1","\n","M=",M,"\n","SD=",SD,"\n","n=",n,sep = "")) +
   annotate("text", x = 150, y = 0.02, hjust = "right", label = paste("m=",round(mean(datosx),2),"\n","sd=",round(sd(datosx),2),sep = ""))
 
-# Let's see how well these data adjust to the underlying reality (which I know is a normal distribution with mean 100 and SD 15).
+# Let's see how well these data adjust to the underlying reality
+# (which I know is a normal distribution with mean 100 and SD 15).
 
 ggplot(datos, aes(datosx))  +
   geom_histogram(colour="black", fill="grey", binwidth=10, aes(y=..density..)) +
@@ -86,8 +90,9 @@ ggplot(datos, aes(datosx))  +
   annotate("text", x = 150, y = 0.07, hjust = "right", label = paste("NExps=1","\n","M=",M,"\n","SD=",SD,"\n","n=",n,sep = "")) +
   annotate("text", x = 150, y = 0.02, hjust = "right", label = paste("m=",round(mean(datosx),2),"\n","sd=",round(sd(datosx),2),sep = ""))
 
-# To see that the density is the same as a continuous histogram, and the sampled distribution ultimately comes from the populational distribution,
-# we repeat the experiment with a much larger sample.
+# To see that the density is the same as a continuous histogram, and
+# the sampled distribution ultimately comes from the populational
+# distribution, we repeat the experiment with a much larger sample.
 
 n=1000000
 M=100
@@ -126,38 +131,44 @@ ggplot(datos, aes(datosx))  +
   annotate("text", x = 150, y = 0.07, hjust = "right", label = paste("NExps=1","\n","M=",M,"\n","SD=",SD,"\n","n=",n,sep = "")) +
   annotate("text", x = 150, y = 0.02, hjust = "right", label = paste("m=",round(mean(datosx)),"\n","sd=",round(sd(datosx)),sep = ""))
 
-# This is a validation of our random number generator: the produced numbers do come from a normal distribution with the set mean and SD.
+# This is a validation of our random number generator: the produced
+# numbers do come from a normal distribution with the set mean and
+# SD.
 
 
 ##### INFERENTIAL STATISTICS ######
 
-# Usually, we are not interested in the sample mean, but we want to know the
-# populational mean
-# (or sometimes other parameters, such as the standard deviation).
-# But for practical reasons we cannot assess the whole population. Samples are
-# almost always a fraction of the population.
-# This produces a problem: each time we repeat the study (that is, each time
-# we extract a new sample and measure its intelligence)
-# the data are different and their means and sds differ.
+# Usually, we are not interested in the sample mean, but we want to
+# know the populational mean (or sometimes other parameters, such as
+# the standard deviation). But for practical reasons we cannot
+# assess the whole population. Samples are almost always a fraction
+# of the population. This produces a problem: each time we repeat
+# the study (that is, each time we extract a new sample and measure
+# its intelligence) the data are different and their means and sds
+# differ.
 
-# The difference in sample parameters from population parameters is due to
-# many factors. There is the basic fact that because of random extraction,
-# the parameters of the sample will not usually coincide with the parameters
-# of the population. The greater the "real" (populational) variability
-# the greater the variations between samples. But it can also be due to factors that affect the study (perhaps our measure is not very precise,
-# or some of our participants did not sleep well, or a myriad other factors).
+# The difference in sample parameters from population parameters is
+# due to many factors. There is the basic fact that because of
+# random extraction, the parameters of the sample will not usually
+# coincide with the parameters of the population. The greater the
+# "real" (populational) variability the greater the variations
+# between samples. But it can also be due to factors that affect
+# the study (perhaps our measure is not very precise,
+# or some of our participants did not sleep well, or a myriad other
+# factors).
 
-# The key question is: from sampled data, how can we estimate the real,
-# populational value of the mean (or any other parameter of interest)?
-# The esential problema is the NOISE, the degree of variability that there is
-# in sampled data. We will call this noise "sampling error".
+# The key question is: from sampled data, how can we estimate the
+# real, populational value of the mean (or any other parameter of
+# interest)? The esential problema is the NOISE, the degree of
+# variability that there is in sampled data. We will call this
+# noise "sampling error".
 
-# The main factor that affects sampling error is sample size. As we showed
-# above, when sample size is huge, the sample mean coincides with the
-# populational mean.
-# Let simulate that we repeat the prior study many times without changing
-# populational parameters (mean and SD constant), and using samples of
-# different sizes.
+# The main factor that affects sampling error is sample size. As we
+# showed above, when sample size is huge, the sample mean coincides
+# with the populational mean.
+# Let simulate that we repeat the prior study many times without
+# changing populational parameters (mean and SD constant), and
+# using samples of different sizes.
 
 nSims = 1000 # Set the number of repetitions of the study.
 n=10 # Set sample size of each study.

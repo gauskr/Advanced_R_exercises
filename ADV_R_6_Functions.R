@@ -1634,18 +1634,85 @@ rm(`*tmp*`)
 1 + (2 + 3)
 if (length(x) <= 5) x[[5]] else x[[n]]
 
+# Answers:
+`+`(`+`(1, 2), 3)
+`+`(1, `+`(2, 3))
+`if`(length(x) <= 5, x[[5]], x[[n]])
+`
+
 # 2. Clarify the following list of odd function calls:
 
 x <- sample(replace = TRUE, 20, x = c(1:10, NA))
 y <- runif(min = 0, max = 1, 20)
 cor(m = "k", y = y, u = "p", x = x)
 
+# Answers:
+x <- sample(c(1:10, NA), size = 20, replace = TRUE)
+y <- runif(20, min = 0, max = 1)
+cor(x, y, use = "pairwise.complete.obs", method = "kendall")
+
 # 3. Explain why the following code fails:
 
 modify(get("x"), 1) <- 10
+x <- 1:10
+modify(get("x"), 1) <- 10
+y <- get("x")
+`modify<-`
+x <- 1:10
+tracemem(x)
+y <- get("x")
+z <- y
+z[1] <- 4
+z <- x
+tracemem(x)
+tracemem(get("x"))
+get("x")[3] <- 10
+get
+z[2] <- 5
+??modify
+get("%o%")
+outer
+
+# Answer:
+# It's the get()-function that doesn't work:
+get("x")[3] <- 10
+# Error in get("x")[3] <- 10 :
+# target of assignment expands to non-language object
+# Since I don't know what this means, I will consult the solutions:
+
+# "R internally transforms the code, and the transformed code
+# reproduces the error above:
+get
+get("x") <- `modify<-`(get("x"), 1, 10)
+#> Error in get("x") <- `modify<-`(get("x"), 1, 10) :
+#>   target of assignment expands to non-language object
+# The error occurs during the assignment because no corresponding
+# replacement function, i.e. get<-, exists for get()."
+
+# Let's test this...
+
+`get<-` <- function(xchar, x, pos = -1L, envir = as.environment(pos), mode = "any",
+                    inherits = TRUE) {
+  x <- .Internal(get(xchar, envir, mode, inherits))
+  return(x)
+  }
+get <- `get<-`
+modify(`get<-`("x"), 1) <- 10 # Nope...
+rm(get)
 
 # 4. Create a replacement function that modifies a random location
 # in a vector.
+
+`randmod<-` <- function(x, position = modthis, new) {
+modthis <- sample(length(x), 1)
+x[modthis] <<- new
+}
+x
+`randmod<-`(x, 11)
+rm(randmod)
+`randmod<-`(x) <- 11
+randmod(x) <- 11
+names(x) <- c("a", "b")
 
 # 5. Write your own version of + that pastes its inputs together if
 # they are character vectors but behaves as usual otherwise. In

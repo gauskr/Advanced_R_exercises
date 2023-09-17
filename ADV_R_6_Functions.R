@@ -1788,3 +1788,4 @@ f2(10, stop("This is an error!"))
 # What is an infix function? How do you write it? What’s a replacement function? How do you write it?
 
 # How do you ensure that cleanup action occurs regardless of how a function exits?
+#test

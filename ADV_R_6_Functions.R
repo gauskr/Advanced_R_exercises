@@ -1739,26 +1739,78 @@ add(4,5)
 }
 "a" + "bhf"
 3+6
+1+"a"
 add
 `+`
-# 6. Create a list of all the replacement functions found in the
-# base package. Which ones are primitive functions? (Hint: use
-# apropos().)
-apropos
+rm(`+`, add)
+
+# 6. Create a list of all the replacement functions found in
+# the base package. Which ones are primitive functions? (Hint:
+# use apropos().)
+
+replacement_func <- apropos("<-")
+library(tidyverse)
+replacment_func_list <- lapply(replacement_func, find)
+replacement_func[as.logical(
+  map_int(
+    lapply(
+  replacment_func_list, str_detect, pattern = "package:base"
+  ),
+  sum)
+  )]
 
 # 7. What are valid names for user-created infix functions?
 
+# Defining your own infix function is simple. You create a
+# two argument function and bind it to a name that starts
+# and ends with %:
+
+`%+%` <- function(a, b) paste0(a, b)
+"new " %+% "string:" %+% "   " %+% "Yeah!"
+str_c
+
 # 8. Create an infix xor() operator.
+(3 | 4) & !(3 & 5)
+(F | 2)
+!(F | 2)
+
+xor(, 5)
+xor
+
+`%xor%` <- function(x, y) { (x | y) & !(x & y) }
+
+F %xor% T
 
 # 9. Create infix versions of the set functions intersect(),
-# union(), and setdiff(). You might call them %n%, %u%, and %/% to
-# match conventions from mathematics.
+# union(), and setdiff(). You might call them %n%, %u%, and
+# %/% to match conventions from mathematics.
+
+`%n%` <- function(x, y)  intersect(x, y)
+c("a", "c", "f") %n% c("a", "b", "c")
+
+`%u%` <- function(x, y) union(x, y)
+c("a", "c", "f") %u% c("a", "b", "c")
+
+`%/%` <- function(x, y) setdiff(x, y)
+c("a", "c", "f") %/% c("a", "b", "c")
+
 
 # QUIZ --------------------------------------------------------------------
 
-# Answer the following questions to see if you can safely skip this chapter. You can find the answers in Section 6.9.
+# Answer the following questions to see if you can safely
+# skip this chapter. You can find the answers in Section
+# 6.9.
 
 # What are the three components of a function?
+# Tent. ans: The body, the arguments, the function name?
+
+# The formals(), the list of arguments that control how you
+# call the function.
+
+# The body(), the code inside the function.
+
+# The environment(), the data structure that determines how
+# the function finds the values associated with the names.
 
 # What does the following code return?
 
@@ -1770,22 +1822,64 @@ f1 <- function(x) {
 }
 f1(1)()
 
+# Should return 11
+
 # How would you usually write this code?
 
 `+`(1, `*`(2, 3))
+1 + 2 * 3
+
 
 # How could you make this call easier to read?
 
 mean(, TRUE, x = c(1:10, NA))
+# Ans:
+mean(c(1:10, NA), na.rm = TRUE)
 
-# Does the following code throw an error when executed? Why or why not?
+# Does the following code throw an error when executed?
+# Why or why not?
 
 f2 <- function(a, b) {
     a * 10
   }
 f2(10, stop("This is an error!"))
 
-# What is an infix function? How do you write it? What’s a replacement function? How do you write it?
+# Would guess not. b isn't used within the func. Should return
+# 100
 
-# How do you ensure that cleanup action occurs regardless of how a function exits?
-#test
+# What is an infix function? How do you write it?
+# What’s a replacement function? How do you write it?
+
+# A infix function is a function that works as if it was a
+# mathematical function. a + b  is actually `+`(a, b).
+
+# Infix:
+`%test%` <- function(a, b) str_remove(a, pattern = b)
+"apekatten" %test% "katten"
+test <- `%test%`
+"apekatten" `test` "katten" # ERROR
+"apekatten" test "katten" # ERROR
+test("apekatten", "katten") # Works
+
+#Replacement
+`two<-` <- function(a, value) {
+  a[2] <- value
+  a
+}
+x <- 1:5
+
+two(x) <- 5
+
+`second<-` <- function(x, value) {
+  x[2] <- value
+  x
+}
+
+x <- 1:10
+second(x) <- 5L
+x
+#>  [1]  1  5  3  4  5  6  7  8  9 10
+# How do you ensure that cleanup action occurs regardless of
+# how a function exits?
+
+# Ans. use on.exit()!

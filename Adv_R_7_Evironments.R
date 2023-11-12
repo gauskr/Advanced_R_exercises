@@ -247,3 +247,108 @@ truls$trine <- trine
 trine$truls$trine$truls
 truls
 
+# 7.3 Recursing over environments -----------------------------------------
+
+where <- function(name, env = caller_env()) {
+  if (identical(env, empty_env())) {
+    # Base case
+    stop("Can't find ", name, call. = FALSE)
+  } else if (env_has(env, name)) {
+    # Success case
+    env
+  } else {
+    # Recursive case
+    where(name, env_parent(env))
+  }
+}
+
+where("yyy")
+x <- 5
+where("x")
+where("mean")
+
+e4 <- env(empty_env(), a = 1, b = 2)
+e4b <- env(e4, x = 10, a = 11)
+
+# f <- function(..., env = caller_env()) { # Sceleton of recursive function
+#   if (identical(env, empty_env())) {
+#     # Base case
+#   } else if {
+#     # Success case
+#   } else {
+#     f(..., env = env_parent(env))
+#   }
+# }
+
+# Iteration vs recursion:
+
+f2 <- function(..., env = caller_env()) {
+  while (!identical(env, empty_env())) {
+    if (success) {
+      # Success case
+      return()
+    }
+    # Inspect parent
+    env <- env_parent(env)
+  }
+
+  # Base case
+}
+
+# 7.3.1 Exercises ---------------------------------------------------------
+
+# 1. Modify where() to return all environments that contain a binding for name.
+# Carefully think through what type of object the function will need to return.
+
+where2 <- function(name, env = caller_env(), successes = 0) {
+  if (identical(env, empty_env()) & successes == 0) {
+    # Base case
+    stop("Can't find ", name, call. = FALSE)
+  } else if (identical(env, empty_env())) {
+    message("Search complete (Reached empty_env())")
+  } else if (env_has(env, name)) {
+    # Success case
+    print(env)
+    successes <- successes + 1
+    where2(name, env_parent(env), successes = successes)
+  } else {
+    # Recursive case
+    where2(name, env_parent(env))
+  }
+}
+mean <- "mean"
+where2("mean")
+
+# 2. Write a function called fget() that finds only function objects. It should
+# have two arguments, name and env, and should obey the regular scoping rules
+# for functions: if there’s an object with a matching name that’s not a function,
+# look in the parent. For an added challenge, also add an inherits argument
+# which controls whether the function recurses up the parents or only looks in
+# one environment.
+fget()
+fget <- function(name, env = caller_env(), recursive = TRUE) {
+  if (identical(env, empty_env())) {
+    # Base case
+    stop("Can't find ", name, call. = FALSE)
+  } else if (env_has(env, name)) {
+    # Success case
+    f <- env_get(name, env = env)
+    if (is.function(f)) {
+      return(f)
+    } else if (recursive == TRUE) {
+      fget(name, env_parent(env))
+    }
+  } else if (recursive == TRUE) {
+    # Recursive case
+    fget(name, env_parent(env))
+  }
+}
+
+f <- fget("mean")
+f
+f <- fget("mean", recursive = FALSE)
+f
+f <- fget("yyy")
+
+# 7.4 Special environments ------------------------------------------------
+

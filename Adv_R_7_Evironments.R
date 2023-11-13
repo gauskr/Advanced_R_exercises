@@ -339,7 +339,7 @@ fget <- function(name, env = caller_env(), recursive = TRUE) {
       fget(name, env_parent(env))
     }
   } else if (recursive == TRUE) {
-    # Recursive case
+    # Recursive casewhere
     fget(name, env_parent(env))
   }
 }
@@ -351,4 +351,97 @@ f
 f <- fget("yyy")
 
 # 7.4 Special environments ------------------------------------------------
+
+# 7.4.1 Package environments and the search path --------------------------
+search()
+search_envs()
+base_env() # Get base environment.
+
+# 7.4.2 The function environment ------------------------------------------
+
+y <- 1
+f <- function(x) x + y
+fn_env(f)
+
+e <- env()
+e$g <- function() 1
+
+# 7.4.3 Namespaces --------------------------------------------------------
+
+?`::`
+sd
+
+# Has a namespace environment (internal)
+# Has package environment (external)
+
+# 7.4.4 Execution environments --------------------------------------------
+
+g <- function(x) {
+  if (!env_has(current_env(), "a")) {
+    message("Defining a")
+    a <- 1
+  } else {
+    a<-a + 1
+  }
+  return(a)
+}
+# What will it return the first time? What about the second?
+g(10)
+g(10)
+
+h <- function(x) {
+  # 1.
+  a <- 2 #2.
+  x + 2
+}
+
+y <- h(1) #3.
+
+# compare with figure!
+
+# An execution environment is usually ephemeral; once the function has completed,
+# the environment will be garbage collected. There are several ways to make it stay
+# around for longer. The first is to explicitly return it:
+
+h2 <- function(x) {
+  a <- x * 2
+  current_env()
+}
+e <- h2(10)
+env_print(e)
+fn_env(h2)
+
+# Another way to capture it is to return an object with a binding to that environment,
+# like a function. The following example illustrates that idea with a function factory,
+# plus(). We use that factory to create a function called plus_one().
+
+plus <- function(x) {
+  function(y) x + y
+}
+
+plus_one <- plus(1)
+plus_one
+# see image
+plus_one(2)
+# see image
+
+# 7.4.5 Exercises ---------------------------------------------------------
+
+# 1. How is search_envs() different from env_parents(global_env())?
+
+# 2. Draw a diagram that shows the enclosing environments of this function:
+
+  f1 <- function(x1) {
+    f2 <- function(x2) {
+      f3 <- function(x3) {
+        x1 + x2 + x3
+      }
+      f3(3)
+    }
+    f2(2)
+  }
+f1(1)
+
+# 3. Write an enhanced version of str() that provides more information about functions.
+# Show where the function was found and what environment it was defined in.
 

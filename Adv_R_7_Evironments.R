@@ -427,7 +427,27 @@ plus_one(2)
 
 # 7.4.5 Exercises ---------------------------------------------------------
 
-# 1. How is search_envs() different from env_parents(global_env())?
+# 1. How is search_envs() different from
+# env_parents(global_env())?
+
+# Answer: search_envs() is actually a wrapper around env_parents()
+search_envs
+# Therefore the difference is that where env_parents() has
+# default arguments env = caller_env(), last = global_env()
+env_parents
+# search_envs(), which has no arguments, just sets a particular
+# value to to env_parents arguments
+# env = env(.GlobalEnv), last = base_env()
+# That's why env_parnets(), with no user defined arguments,
+# give a different result than search_envs()
+env_parents() # show parents from rlang (the caller env) to the
+# emtpy environment.
+search_envs() # show parents from the global environment and to
+# the base environment.
+# Setting the arguments in parent_envs() to the same user defined
+# values as search_envs(), thus give the exact same result as
+# search_envs():
+env_parents(env(.GlobalEnv), last = base_env())
 
 # 2. Draw a diagram that shows the enclosing environments of this function:
 

@@ -449,7 +449,8 @@ search_envs() # show parents from the global environment and to
 # search_envs():
 env_parents(env(.GlobalEnv), last = base_env())
 
-# 2. Draw a diagram that shows the enclosing environments of this function:
+# 2. Draw a diagram that shows the enclosing environments of
+# this function:
 
   f1 <- function(x1) {
     f2 <- function(x2) {
@@ -462,6 +463,64 @@ env_parents(env(.GlobalEnv), last = base_env())
   }
 f1(1)
 
-# 3. Write an enhanced version of str() that provides more information about functions.
-# Show where the function was found and what environment it was defined in.
+f1 <- function(x1) {
+  f2 <- function(x2) {
+    f3 <- function(x3) {
+      x1 + x2 + x3
+      print("f3")
+      print(env_print())
+    }
+    f3(3)
+    print("f2")
+    print(env_print())
+
+  }
+  f2(2)
+  print("f1")
+  print(env_print())
+
+}
+f1(1)
+
+
+# 3. Write an enhanced version of str() that provides more
+# information about functions. Show where the function was
+# found and what environment it was defined in.
+
+fget2 <- function(env = caller_env(), name) {
+  if (identical(env, empty_env())) {
+    # Base case
+    stop("Can't find a funcion called ", name, call. = FALSE)
+  } else if (env_has(env, name)) {
+    # Success case
+    obj <- env_get(env, name)
+    if (is.function(obj)) {
+
+    return(list(fun = obj, env = env))
+
+      }
+    } else {
+    # Recursive case
+    fget2(env_parent(env), name)
+  }
+}
+
+str2 <- function(env = caller_env(), name) {
+
+if (!is.character(name)) {
+
+  stop("Name must be a character vector size one")
+
+} else {
+obj <-  fget2(env = env, name = name)
+list(
+  where = obj$env,
+  enclosing = obj$fun
+)
+}
+
+}
+
+str2(name = "env")
+where2("mean")
 

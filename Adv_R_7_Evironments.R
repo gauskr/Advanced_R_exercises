@@ -524,3 +524,169 @@ list(
 str2(name = "env")
 where2("mean")
 
+# Call stacks -------------------------------------------------------------
+
+parent.frame # similar
+caller_env
+
+# 7.5.1 Simple call stacks ------------------------------------------------
+
+f <- function(x) g(x = 2)
+g <- function(x) h(x = 3)
+h <- function(x) stop()
+
+f(2)
+traceback()
+
+h <- function(x) lobstr::cst()
+f(1)
+
+# 7.5.2 Lazy evaluation ---------------------------------------------------
+
+a <- function(x) b(x)
+b <- function(x) c(x)
+c <- function(x) x
+
+a(f())
+
+# 7.5.3 Frames ------------------------------------------------------------
+
+# A frame has three key components:
+
+# An expression (labelled with expr) giving the function call. This is what
+# traceback() prints out.
+
+# An environment (labelled with env), which is typically the execution
+# environment of a function. There are two main exceptions: the environment of
+# the global frame is the global environment, and calling eval() also
+# generates frames, where the environment can be anything.
+
+# A parent, the previous call in the call stack (shown by a grey arrow).
+
+# 7.5.4 Dynamic scope -----------------------------------------------------
+
+# 7.5.5 Exercises ---------------------------------------------------------
+
+# Write a function that lists all the variables defined in the environment in
+# which it was called. It should return the same results as ls().
+
+find_objects_in_call_env <- function() {
+#  caller_env()
+  if (env_name(caller_env()) == env_name(global_env())) {
+ sort(names(caller_env()))[-1] # [-1] to remove .RandomSeed, an object not shown by ls()
+  } else {
+    obj <- names(caller_env())
+    sort(obj)
+}
+}
+
+test <- function() {
+  a <- 1
+  b <- 2
+  c <- 3
+  find_objects_in_call_env()
+  }
+
+find_objects_in_call_env()
+test()
+
+# I don't really understand why this works... but it does!
+# Returns ls() - like list when called from the global environment, but just the
+# objects defined inside test() when running test().
+
+# 7.6 As data structures --------------------------------------------------
+
+# As well as powering scoping, environments are also useful data structures in
+# their own right because they have reference semantics. There are three
+# common problems that they can help solve:
+
+# Avoiding copies of large data. Since environments have reference semantics,
+# you’ll never accidentally create a copy. But bare environments are painful
+# to work with, so instead I recommend using R6 objects, which are built on
+# top of environments. Learn more in Chapter 14.
+
+# Managing state within a package. Explicit environments are useful in
+# packages because they allow you to maintain state across function calls.
+# Normally, objects in a package are locked, so you can’t modify them directly.
+# Instead, you can do something like this:
+
+my_env <- new.env(parent = emptyenv())
+my_env$a <- 1
+
+get_a <- function() {
+  my_env$a
+}
+
+set_a <- function(value) {
+  old <- my_env$a
+  my_env$a <- value
+  invisible(old)
+}
+
+b <- set_a(1)
+get_a()
+b
+
+# Returning the old value from setter functions is a good pattern because it
+# makes it easier to reset the previous value in conjunction with on.exit()
+# (Section 6.7.4).
+
+# As a hashmap. A hashmap is a data structure that takes constant, O(1), time
+# to find an object based on its name. Environments provide this behaviour by
+# default, so can be used to simulate a hashmap. See the hash package45 for a
+# complete development of this idea.
+
+# QUIZ --------------------------------------------------------------------
+
+# 1. List at least three ways that an environment differs from a list.
+
+# Answer:
+# An environment is modified-in-place. That is, it doesn't change address when
+# modified. A list is copied-on-modified.
+
+# A list is a vector. An environment is not. Therefore lists can be handled
+# vectorized, while environments can't.
+
+# An environment has a parent, a list doesn't.
+
+# Other differences follows from the above. For instance, an environment, because
+# of the two first, can contain itself. A list can't really, because it's modified
+# and given a new address when altered.
+
+# 2. What is the parent of the global environment? What is the only
+# environment that doesn’t have a parent?
+
+# Answer:
+# The last loaded package is the parent of the global environment, while the
+# empty environment does't have a parent.
+
+# 3. What is the enclosing environment of a function? Why is it important?
+
+# The enclosing environment of a function is where it was created. I think.
+# This may be important 1. when calling functions within functions (non-itaratively).
+# 2. In order to evaluate what's going on in functions created by function-
+# factories.
+
+# 4. How do you determine the environment from which a function was called?
+# you add a caller_env() within the function?
+
+# 5. How are <- and <<- different?
+# <- creates a binding within an environment, while <<- creates a binding in the
+# parent environment.
+
+# FASIT:
+
+# There are four ways: every object in an environment must have a name; order
+# doesn’t matter; environments have parents; environments have reference
+# semantics.
+
+# The parent of the global environment is the last package that you loaded.
+# The only environment that doesn’t have a parent is the empty environment.
+
+# The enclosing environment of a function is the environment where it was
+# created. It determines where a function looks for variables.
+
+# Use caller_env() or parent.frame().
+
+# <- always creates a binding in the current environment; <<- rebinds an
+# existing name in a parent of the current environment.

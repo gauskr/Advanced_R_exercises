@@ -24,7 +24,7 @@ library(rlang)
 # an interrupt, which indicates that the user has interrupted execution by
 # pressing Escape, Ctrl + Break, or Ctrl + C (depending on the platform).
 
-stop("This is what an error looks like!")
+stop("This is what an error looks like")
 warning("This is what a warning looks like")
 message("This is what a message looks like")
 
@@ -52,3 +52,44 @@ message("This is what a message looks like")
 # 3. What’s the main difference between tryCatch() and withCallingHandlers()?
 
 # 4. Why might you want to create a custom error object?
+
+# 8.2.1 Errors ------------------------------------------------------------
+
+f <- function() g()
+g <- function() h()
+h <- function() stop("This is an error!")
+
+f()
+
+# Good practice:
+h <- function() stop("This is an error!", call. = FALSE)
+f()
+
+# 8.2.2 Warnings ----------------------------------------------------------
+
+fw <- function() {
+  cat("1\n")
+  warning("W1")
+  cat("2\n")
+  warning("W2")
+  cat("3\n")
+  warning("W3")
+}
+fw()
+
+# You can control this behaviour with the warn option:
+
+# To make warnings appear immediately, set options(warn = 1).
+
+# To turn warnings into errors, set options(warn = 2). This is usually the
+# easiest way to debug a warning, as once it’s an error you can use tools
+# like traceback() to find the source.
+
+# Restore the default behaviour with options(warn = 0).
+
+# In my opinion, base R tends to overuse warnings, and many warnings in base R
+# would be better off as errors. For example, I think these warnings would be
+# more helpful as errors:
+
+formals(1)
+file.remove("This-file-doesn't-exist")

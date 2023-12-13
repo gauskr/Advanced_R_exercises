@@ -138,4 +138,54 @@ file_remove("doddo.txt")
 # 2. What does the appendLF argument to message() do?
 # How is it related to cat()?
 
+# Answer: To answer this, it might be instructive to first examine the function
+# message
 ?message
+
+# The function message(..., domain = NULL, appendLF = TRUE) generates a
+# diagnostic message from its arguments.
+# The argument appendLF	appears at the end of the argument-list (see below).
+# It is a logical argument which defaults to TRUE, and determines wether
+# messages given as a character string should have a newline appended.
+
+# How, then, does it relate to cat(). Let's look "inside" (as far as inside is
+# easily available to the user) the function.
+
+message
+
+# function (..., domain = NULL, appendLF = TRUE)
+# {
+#   cond <- if (...length() == 1L && inherits(..1, "condition")) {
+#     if (nargs() > 1L)
+#       warning("additional arguments ignored in message()")
+#     ..1
+#   }
+#   else {
+#     msg <- .makeMessage(..., domain = domain, appendLF = appendLF)
+#     call <- sys.call()
+#     simpleMessage(msg, call)
+#   }
+#   defaultHandler <- function(c) {
+#     cat(conditionMessage(c), file = stderr(), sep = "")
+#   }
+#   withRestarts({
+#     signalCondition(cond)
+#     defaultHandler(cond)
+#   }, muffleMessage = function() NULL)
+#   invisible()
+# }
+
+message("Hello!", "Goodbye!", "This", "is", "a", "complicated", "way", "of", "messaging!")
+# ... - argument means zero or more objects which can be coerced to character
+# (and which are pasted together with no separator) or (for message only) a
+# single condition object.
+
+.makeMessage
+
+?...length
+...length # .Primitive("...length")
+?.Primitive # .Primitive looks up by name a ‘primitive’
+# (internally implemented) function.
+.Primitive # .Primitive(".Primitive")
+# Comment: Interesting structure.
+

@@ -94,7 +94,7 @@ fw()
 
 formals(1)
 file.remove("This-file-doesn't-exist")
-lag(1:3, k = 1.5)
+lag(1:3, k = 1.5) # Actually throw an error now, my comm....
 as.numeric(c("18", "30", "50+", "345,678"))
 
 # Two situations where warnings are appropriate:
@@ -145,7 +145,7 @@ file_remove("doddo.txt")
 # The function message(..., domain = NULL, appendLF = TRUE) generates a
 # diagnostic message from its arguments.
 # The argument appendLF	appears at the end of the argument-list (see below).
-# It is a logical argument which defaults to TRUE, and determines wether
+# It is a logical argument which defaults to TRUE, and determines whether
 # messages given as a character string should have a newline appended.
 
 # How, then, does it relate to cat(). Let's look "inside" (as far as inside is
@@ -175,7 +175,7 @@ message
 #   invisible()
 # }
 
-message("Hello!", "Goodbye!", "This", "is", "a", "complicated", "way", "of", "messaging!")
+message("Hello! ", "Goodbye! ", "This ", "is ", "a ", "complicated ", "way ", "of ", "messaging!")
 # ... - argument means zero or more objects which can be coerced to character
 # (and which are pasted together with no separator) or (for message only) a
 # single condition object.
@@ -188,4 +188,131 @@ message("Hello!", "Goodbye!", "This", "is", "a", "complicated", "way", "of", "me
 # (internally implemented) function.
 .Primitive # .Primitive(".Primitive")
 # Comment: Interesting structure.
+
+cat
+?...length
+cat("Doesn't", "work", "or", "does", "it")
+
+# Cat just prints everything w the objects separated by " ".
+
+cat(str_c("generate bvfylke",1993:2021, " = substr(bvkomm", 1993:2021, ", 1, 2)\ndestring bvfylke", 1993:2021, ", force"), sep = "\n")
+
+# because of the default sep-argument...
+
+# My answer, which I'm not 100% saticfied with is that the appendLF-argument in message is set to TRUE, because of the makeMessage makes
+# better use of it, or simply need it. Then cat is set to sep = "". Is it possible to tweak the function? Let's see:
+
+message2 <- function (..., domain = NULL, appendLF = FALSE)
+{
+  cond <- if (...length() == 1L && inherits(..1, "condition")) {
+    if (nargs() > 1L)
+      warning("additional arguments ignored in message()")
+    ..1
+  }
+  else {
+    msg <- .makeMessage(..., domain = domain, appendLF = appendLF)
+    call <- sys.call()
+    simpleMessage(msg, call)
+  }
+  defaultHandler <- function(c) {
+    cat(conditionMessage(c), file = stderr(), sep = " ")
+  }
+  withRestarts({
+    signalCondition(cond)
+    defaultHandler(cond)
+  }, muffleMessage = function() NULL)
+  invisible()
+}
+
+message("This", "is", "a", "message")
+message2("This", "is", "a", "message")
+message("This ", "is ", "a ", "\n", "message")
+message2("This ", "is ", "a ", "\n", "message")
+
+# Hm...
+
+test1 <- function() {
+  message("This", "is", "a", "message")
+  message("This", "is", "also", "a", "message")
+}
+
+test2 <- function() {
+  message2("This", "is", "a", "message")
+  message2("This", "is", "also", "a", "message")
+}
+
+test1()
+test2()
+
+# Now I get it! The above theories is irelevant.
+# What happen's is something akin to this:
+
+cat(stringr::str_c("Line 1", "Line 2", sep = ""), sep = "") # message2 - case (appendLF = FALSE)
+cat(stringr::str_c("Line 1", "Line 2", sep = "\n"), sep = "") # message.
+
+message3 <- function (..., domain = NULL, appendLF = FALSE)
+{
+  cond <- if (...length() == 1L && inherits(..1, "condition")) {
+    if (nargs() > 1L)
+      warning("additional arguments ignored in message()")
+    ..1
+  }
+  else {
+    msg <- .makeMessage(..., domain = domain, appendLF = appendLF)
+    call <- sys.call()
+    simpleMessage(msg, call)
+  }
+  defaultHandler <- function(c) {
+    cat(conditionMessage(c), file = stderr(), sep = "\n")
+  }
+  withRestarts({
+    signalCondition(cond)
+    defaultHandler(cond)
+  }, muffleMessage = function() NULL)
+  invisible()
+}
+
+test3 <- function() {
+  message3("This", "is", "a", "message")
+  message3("This", "is", "also", "a", "message")
+}
+
+test3() # The difference between message2 and message3 is that cat has a sep = "\n" in message3.
+# appendLF = TRUE is more intuitive, as it draws attention to the operation in the argument-section.
+# This is my final answer...
+
+# 8.3 Ignoring conditions -------------------------------------------------
+
+f1 <- function(x) {
+  log(x)
+  10
+}
+f1("x")
+
+f2 <- function(x) {
+  try(log(x))
+  10
+}
+f2("a")
+
+default <- NULL
+try(default <- read.csv("possibly-bad-input.csv"), silent = TRUE)
+
+suppressWarnings({
+  warning("Uhoh!")
+  warning("Another warning")
+  1
+})
+
+suppressMessages({
+  message("Hello there")
+  2
+})
+
+suppressWarnings({
+  message("You can still see me")
+  3
+})
+
+# 8.4 Handling conditions -------------------------------------------------
 

@@ -26,9 +26,38 @@ library(rlang)
 
 # 2. What function do you use to ignore errors in block of code?
 
+# The easiest way to ignore errors would be to use try(). E.g. instead of
+
+# function(x) {
+# do_stuff(x)
+# do_something_else
+# return(something)
+#}
+
+# where do_stoff(x) might trhow an error, on can do
+
+# function(x) {
+# try(do_stuff(x)) # This is where I use try()
+# do_something_else
+# return(something)
+#}
+
+# Here, the function simply tries do_stuff(x). If it doesn't work, then it will move on to do_something_else
+# instead of aborting.
+
 # 3. What’s the main difference between tryCatch() and withCallingHandlers()?
 
+# Answer:
+# tryCatch() and withCallingHandlers differs in the kind of handlers they create.
+
+# tryCatch() defines exiting handlers; after the condition is handled, control returns to the context where tryCatch() was called.
+# This makes tryCatch() most suitable for working with errors and interrupts, as these have to exit anyway.
+
+# withCallingHandlers() defines calling handlers; after the condition is captured control returns to the context where the condition
+# was signalled. This makes it most suitable for working with non-error conditions.
+
 # 4. Why might you want to create a custom error object?
+
 
 # 8.2 Signalling conditions -----------------------------------------------
 
@@ -315,4 +344,29 @@ suppressWarnings({
 })
 
 # 8.4 Handling conditions -------------------------------------------------
+
+tryCatch(
+  error = function(cnd) {
+    # code to run when error is thrown.
+  },
+  code_to_run_when_handlers_are_active
+)
+
+withCallingHandlers(
+  warning = function(cnd) {
+    # code to run when warning is signalled
+  },
+  message = function(cnd) {
+    # code to run when message is signalled
+  },
+  code_to_run_while_handlers_are_active
+)
+
+# 8.4.1 Condition objects -------------------------------------------------
+
+cnd <- catch_cnd(stop("An error!"))
+str(cnd)
+
+# 8.4.2 Exiting handlers --------------------------------------------------
+
 

@@ -369,4 +369,34 @@ str(cnd)
 
 # 8.4.2 Exiting handlers --------------------------------------------------
 
+f3 <- function(x) {
+tryCatch(
+  error = function(cnd) NA,
+  log(x)
+)
+}
+
+f3("x")
+
+# General form of tryCatch() and withCallingHandlers()
+
+#tryCatch(
+#  error = function(cnd) {
+#    # code to run when error is thrown
+#  },
+#  code_to_run_while_handlers_are_active
+#)
+#
+#
+#withCallingHandlers(
+#  warning = function(cnd) {
+#    # code to run when warning is signalled
+#  },
+#  message = function(cnd) {
+#    # code to run when message is signalled
+#  }
+#  code_to_run_while_handlers_are_active
+#)
+
+# 8.4.1 Condition objects -------------------------------------------------
 

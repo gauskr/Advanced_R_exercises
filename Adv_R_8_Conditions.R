@@ -863,3 +863,154 @@ abort(
 
 # 8.5.1 Motivation --------------------------------------------------------
 
+log(letters)
+log(1:10, base = letters)
+
+my_log <- function(x, base = exp(1)) {
+ if (!is.numeric(x)) {
+   abort(paste0(
+     "`x` must be a numeric vector; not ", typeof(x), "."
+   ))
+ }
+ if (!is.numeric(base)) {
+   abort(paste0(
+     "`base` must be a numeric vector; not ", typeof(base), "."
+   ))
+ }
+ base::log(x, base = base)
+}
+
+my_log(letters)
+my_log(1:10, base = letters)
+
+# This is better. But will only work in interactive settings, not programmatically...
+
+# 8.5.2 Signalling --------------------------------------------------------
+
+abort_bad_argument <- function(arg, must, not = NULL) {
+  msg <- glue::glue("`{arg}` must {must}")
+  if (!is.null(not)) {
+    not <- typeof(not)
+    msg <- glue::glue("{msg}; not {not}.")
+  }
+
+  abort("error_bad_argument",
+        message = msg,
+        arg = arg,
+        must = must,
+        not = not)
+}
+
+stop_custom <- function(.subclass, message, call = NULL, ...) {
+err <- structure(
+  list(
+    message = message,
+    call = call,
+    ...
+  ),
+  class = c(.subclass, "error", "condition")
+)
+stop(err)
+}
+
+
+err <- catch_cnd(
+  stop_custom("error_new", "This is a custom error", x = 10)
+)
+
+class(err)
+err$x
+
+my_log <- function(x, base = exp(1)) {
+  if (!is.numeric(x)) {
+    abort_bad_argument("x", must = "be numeric", not = x)
+  }
+  if (!is.numeric(base)) {
+    abort_bad_argument("base", must = "be numeric", not = base)
+  }
+  base::log(x, base = base)
+}
+
+my_log(letters)
+my_log(1:10, base = letters)
+
+# 8.5.3 Handling ----------------------------------------------------------
+
+library(testthat)
+err <- catch_cnd(my_log("a"))
+expect_s3_class(err, "error_bad_argument")
+expect_equal(err$arg, "x")
+expect_equal(err$not, "character")
+
+tryCatch(
+  error_bad_argument = function(cnd) "bad_argument",
+  error = function(cnd) "other error",
+  my_log("a")
+)
+
+tryCatch(
+  error = function(cnd) "other error",
+  error_bad_argument = function(cnd) "bad_argument",
+  my_log("a")
+)
+
+
+# 8.5.4 Exercises ---------------------------------------------------------
+
+# 1. Inside a package, it’s occasionally useful to check that a package is
+# installed before using it. Write a function that checks if a package is
+# installed (with requireNamespace("pkg", quietly = FALSE)) and if not,
+# throws a custom condition that includes the package name in the metadata.
+
+# Answer:
+pcg <- "Bongo"
+
+test <- function(pcg) {
+result <- requireNamespace(pcg,quietly = T)
+if (!result) {
+inform(message = glue::glue("package ", pcg, " is not installed."), class = c("pck_not_istalled", pcg))
+pcg
+}
+}
+
+test("bongo")
+class(catch_cnd(test("bongo")))
+
+# Define a custom function to check if a package is installed
+check_package_installed <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    # Define a custom condition
+    condition <- structure(
+      list(message = paste("Package", pkg, "is not installed."),
+           pkg = pkg), # Adding package name to metadata
+      class = c("packageNotInstalledError", "error", "condition", pkg)
+    )
+    # Throw the custom error condition
+    stop(condition)
+  } else {
+  # Return TRUE if the package is installed
+  TRUE
+  }
+}
+
+class(catch_cnd(check_package_installed("bongo")))
+
+# I actually solved this one...
+
+# 2. Inside a package you often need to stop with an error when something
+# is not right. Other packages that depend on your package might be tempted
+# to check these errors in their unit tests. How could you help these packages
+# to avoid relying on the error message which is part of the user interface
+# rather than the API and might change without notice?
+
+# From solutions:
+# Instead of returning an error it might be preferable to throw a customised
+# condition and place a standardised error message inside the metadata.
+# Then the downstream package could check for the class of the condition,
+# rather than inspecting the message.
+
+
+# 8.6 Applications --------------------------------------------------------
+
+# 8.6.1 Failure value -----------------------------------------------------
+

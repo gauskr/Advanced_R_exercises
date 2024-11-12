@@ -1014,3 +1014,32 @@ class(catch_cnd(check_package_installed("bongo")))
 
 # 8.6.1 Failure value -----------------------------------------------------
 
+fail_with <- function(expr, value = NULL) {
+  tryCatch(
+    error = function(cnd) value,
+    expr
+  )
+}
+
+fail_with(log(10), NA_real_)
+fail_with(log("x"), NA_real_)
+
+try2 <- function(expr, silent = FALSE) {
+  tryCatch(
+    error = function(cnd) {
+      msg <- conditionMessage(cnd)
+      if (!silent) {
+        message("Error: ", msg)
+      }
+      structure(msg, class = "try-error")
+    },
+    expr
+  )
+}
+
+try2(1)
+try2(stop("Hi"))
+try2(stop("Hi"), silent = TRUE)
+
+# 8.6.2 Success and failure values ----------------------------------------
+
